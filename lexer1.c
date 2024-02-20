@@ -133,6 +133,7 @@ char getCharacter(){
         return EOF;
     }
 
+    if((int)buffer[forwardPtr]== 10)return '\n';
 
     forwardPtr++;
     return c;
@@ -203,6 +204,8 @@ TOKEN tokenizer(){
                 else if (character == '~') state = 57;
 
                 else if(character=='%') state=61;
+
+                else if(character=='\n')state=62;
                 else if(character==EOF){
                     token.name=TK_EOF;
                     return token;
@@ -252,7 +255,6 @@ TOKEN tokenizer(){
                 break;
 
             case 24:
-                printf("1");
                 token.name=TK_RUID;
                 strcpy(token.string,tokenFromPtrs());
                 token.lineNo=lineNo;
@@ -419,6 +421,8 @@ TOKEN tokenizer(){
             case 62:
                 lineNo++;
                 state=0;
+                forwardPtr++;
+                lexemeBegin=forwardPtr;
                 break;
         }
 
@@ -438,7 +442,7 @@ int main(){
 
     while(buffer[forwardPtr]!=EOF){
         TOKEN token=tokenizer();
-        printf("%s %d\n",tokenToString(token.name),lineNo);
+        printf("Line No. %d     Lexeme %s       Token %s\n",lineNo,token.string,tokenToString(token.name));
         if(token.name==TK_EOF) break;
     }
 
