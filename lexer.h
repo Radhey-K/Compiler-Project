@@ -64,14 +64,19 @@ typedef enum {
     TK_EQ,
     TK_GT,
     TK_GE,
-    TK_NE
+    TK_NE,
+    TK_EOF // To detect that file has terminated
 } tokName;
 
 
 typedef struct token {
     tokName name; //should be an enum
     int lineNo;
-    char* tok;
+    union {
+        char* string;
+        int integer;
+        float realNum;
+    };
 
 } TOKEN;
 
