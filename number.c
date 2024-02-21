@@ -13,39 +13,39 @@ TOKEN get_token() {
     char c;
     while(1) {
         switch(state) {
-            case 1: c = nextchar();
+            case 1: c = getCharacter();
                     if(c == '.') state = 2;
                     else if(isdigit(c)) state = 1;
                     else state = 9;
                     break;
                 
-            case 2: c = nextchar();
+            case 2: c = getCharacter();
                     if(isdigit(c)) state = 3;
                     else state = 10;
                     break;
 
-            case 3: c = nextchar();
+            case 3: c = getCharacter();
                     if(isdigit(c)) state = 4;
                     else exit(0);  // Error
                     break;
 
-            case 4: c = nextchar();
+            case 4: c = getCharacter();
                     if (c == 'E') state = 5;
                     else state = 11;
                     break;
 
-            case 5: c = nextchar();
+            case 5: c = getCharacter();
                     if (c == '+' || c == '-') state = 6;
                     else if (isdigit(c)) state = 7;
                     else exit(0);  // Error
                     break;
 
-            case 6: c = nextchar();
+            case 6: c = getCharacter();
                     if (isdigit(c)) state = 7;
                     else exit(0);  // Error
                     break;
 
-            case 7: c = nextchar();
+            case 7: c = getCharacter();
                     if (isdigit(c)) state = 8;
                     else exit(0);
                     break;

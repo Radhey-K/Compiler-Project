@@ -19,17 +19,17 @@ TOKEN get_token(){
     char c;
     while(1){
         switch(state){
-            case 12:    c = nextchar();
+            case 12:    c = getCharacter();
                         if(digit_2to7(c)) state = 13;
                         else if(lowercase(c)) state = 16;
                         else state = 17;
                         break;
-            case 13:    c = nextchar();
+            case 13:    c = getCharacter();
                         if(c=='b' || c=='c' || c=='d') state = 13;
                         else if(digit_2to7(c)) state = 14;
                         else state = 15;
                         break;
-            case 14:    c = nextchar();
+            case 14:    c = getCharacter();
                         if(digit_2to7(c)) state = 14;
                         else state = 15;
                         break;
@@ -37,7 +37,7 @@ TOKEN get_token(){
                         mytoken.token = search_token();
                         if(mytoken.token == IDENTIFIER) mytoken.value = get_id_string();
                         return mytoken;
-            case 16:    c = nextchar();
+            case 16:    c = getCharacter();
                         if(lowercase(c)) state = 16;
                         else state = 17;
                         break;
