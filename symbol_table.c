@@ -24,7 +24,7 @@ ST_ELEMENT create_st_element(){
         printf("Unable to create new symbol table element");
         return;
     }
-    st_ele->lexeme = NULL;
+    // st_ele->lexeme = NULL;
     st_ele->next = NULL;
     st_ele->tk_type = TK_UNKNOWN;
     return st_ele;
@@ -63,7 +63,7 @@ void table_insert(ST stable, char *lexeme, tokName tk_type){
     }
     int insert_index = hash_lexeme(lexeme);
     if (stable == NULL) {
-        printf("Symbol table not initialized")
+        printf("Symbol table not initialized");
         return;
     }
 
@@ -91,7 +91,7 @@ ST_ELEMENT table_lookup(ST stable, char *lexeme) {
      */
     int insert_index = hash_lexeme(lexeme);
     if (stable == NULL) {
-        printf("Symbol table not initialized")
+        printf("Symbol table not initialized");
         return;
     }
     ST_ELEMENT head = (stable->table + insert_index);
@@ -106,7 +106,7 @@ ST_ELEMENT table_lookup(ST stable, char *lexeme) {
 
 int fetch_table_count(ST stable){
     if (stable == NULL) {
-        printf("Symbol table not initialized")
+        printf("Symbol table not initialized");
         return -1;
     }
     return stable->token_count;
@@ -117,7 +117,7 @@ void populate_symbol_table(ST stable){
      * @brief push all keywords to table
      */
     table_insert(stable, "<---", TK_ASSIGNOP);
-    table_insert(stable, "\%", TK_COMMENT);
+    table_insert(stable, "%", TK_COMMENT);
     table_insert(stable, "with", TK_WITH);
     table_insert(stable, "parameters", TK_PARAMETERS);
     table_insert(stable, "end", TK_END);
