@@ -344,7 +344,7 @@ TOKEN tokenizer()
                     if(lowercase(c)) state = 16;
                     else state = 17;
                     break;
-                    
+
         case 17:    retract(1); //TK_FIELDID
                     mytoken.token = search_token();
                     if(mytoken.token == IDENTIFIER) mytoken.value = get_id_string();
@@ -412,23 +412,23 @@ TOKEN tokenizer()
 
         case 25:
             character = getCharacter();
-            if (character == "-")
+            if (character == '-')
                 state = 26;
-            else if (character == "=")
+            else if (character == '=')
                 state = 31;
             else
                 state = 29;
 
         case 26:
             character = getCharacter();
-            if (character == "-")
+            if (character == '-')
                 state = 27;
             else
                 state = 30;
 
         case 27:
             character = getCharacter();
-            if (character == "-")
+            if (character == '-')
                 state = 28;
             else
                 state = 60;
@@ -472,7 +472,7 @@ TOKEN tokenizer()
 
         case 32:
             character = getCharacter();
-            if (character == "=")
+            if (character == '=')
                 state = 33;
             else
                 state = 60;
@@ -489,7 +489,7 @@ TOKEN tokenizer()
 
         case 34:
             character = getCharacter();
-            if (character == "=")
+            if (character == '=')
                 state = 35;
             else
                 state = 36;
@@ -515,7 +515,7 @@ TOKEN tokenizer()
 
         case 37:
             character = getCharacter();
-            if (character == "=")
+            if (character == '=')
                 state = 38;
             else
                 state = 60;
@@ -531,14 +531,14 @@ TOKEN tokenizer()
 
         case 39:
             character = getCharacter();
-            if (character == "@")
+            if (character == '@')
                 state = 40;
             else
                 state = 60;
 
         case 40:
             character = getCharacter();
-            if (character == "@")
+            if (character == '@')
                 state = 41;
             else
                 state = 60;
@@ -554,14 +554,14 @@ TOKEN tokenizer()
 
         case 42:
             character = getCharacter();
-            if (character == "&")
+            if (character == '&')
                 state = 43;
             else
                 state = 60;
 
         case 43:
             character = getCharacter();
-            if (character == "&")
+            if (character == '&')
                 state = 44;
             else
                 state = 60;
