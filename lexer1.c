@@ -155,6 +155,10 @@ char getCharacter()
 
 void retract(int noOfRetractions)
 {
+    forwardPtr -= noOfRetractions;
+    if(forwardPtr < 0){
+        forwardPtr += (2*BUFFER_SIZE);
+    }
 }
 
 // Returns the actual token from when the accept state is reached with help of lexemeBegin and forwardPtr
@@ -186,6 +190,24 @@ char *tokenFromPtrs()
     lexemeBegin=forwardPtr;
 
     return finalToken;
+}
+
+int lexeme_length(){
+    int bufferSize = BUFFER_SIZE * 2;
+    int length1, length2;
+
+    if (forwardPtr < lexemeBegin)
+    {
+        length1 = bufferSize - lexemeBegin;
+        length2 = forwardPtr;
+    }
+    else
+    {
+        length1 = forwardPtr - lexemeBegin;
+        length2 = 0;
+    }
+
+    return length1+length2;
 }
 
 // If there is any error send to error state
@@ -358,6 +380,10 @@ TOKEN tokenizer()
                     break;
 
         case 15:    retract(1); //TK_ID
+                    if(lexeme_length() > MAX_VAR_ID_SIZE){
+                        state = 60;
+                        break;
+                    }
                     token.name = TK_ID;
                     strcpy(token.string, tokenFromPtrs());
                     token.lineNo = lineNo;
@@ -407,6 +433,11 @@ TOKEN tokenizer()
             break;
 
         case 21:
+            retract(1);
+            if(lexeme_length() > MAX_FUN_ID_SIZE){
+                state = 60;
+                break;
+            }
             token.name = TK_FUNID;
             strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
