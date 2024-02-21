@@ -8,6 +8,7 @@
 
 //Need to add more
 typedef enum {
+    TK_UNKNOWN, // For symbol table entry init
     TK_ASSIGNOP,
     TK_COMMENT,
     TK_FIELDID,
