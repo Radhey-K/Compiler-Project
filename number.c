@@ -1,3 +1,5 @@
+#define HELLO 50
+
 typedef struct TOKEN{} TOKEN;
 int state;
 
