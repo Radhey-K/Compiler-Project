@@ -21,7 +21,7 @@ FILE *filePointer;
 
 int isDigit(char c)
 {
-    return isdigit(c) != 0;
+    return isDigit(c) != 0;
 }
 
 int isLetter(char c)
@@ -38,6 +38,12 @@ int isLowercase(char c)
 {
     return islower(c) != 0;
 }
+
+int digit_2to7(char c){
+    int num = c - '0';
+    if(num >= 2 && num <= 7)return 1;
+    else return 0;
+} 
 
 const char* tokenToString(tokName token) {
     switch(token) {
@@ -260,17 +266,17 @@ TOKEN tokenizer()
         
         case 1: character = getCharacter();
                 if(character == '.') state = 2;
-                else if(isdigit(character)) state = 1;
+                else if(isDigit(character)) state = 1;
                 else state = 9;
                 break;
             
         case 2: character = getCharacter();
-                if(isdigit(character)) state = 3;
+                if(isDigit(character)) state = 3;
                 else state = 10;
                 break;
 
         case 3: character = getCharacter();
-                if(isdigit(character)) state = 4;
+                if(isDigit(character)) state = 4;
                 else exit(0);  // Error
                 break;
 
@@ -281,17 +287,17 @@ TOKEN tokenizer()
 
         case 5: character = getCharacter();
                 if (character == '+' || character == '-') state = 6;
-                else if (isdigit(character)) state = 7;
+                else if (isDigit(character)) state = 7;
                 else exit(0);  // Error
                 break;
 
         case 6: character = getCharacter();
-                if (isdigit(character)) state = 7;
+                if (isDigit(character)) state = 7;
                 else exit(0);  // Error
                 break;
 
         case 7: character = getCharacter();
-                if (isdigit(character)) state = 8;
+                if (isDigit(character)) state = 8;
                 else exit(0);
                 break;
 
@@ -336,7 +342,7 @@ TOKEN tokenizer()
 
         case 12:    character = getCharacter();
                     if(digit_2to7(character)) state = 13;
-                    else if(lowercase(character)) state = 16;
+                    else if(isLowercase(character)) state = 16;
                     else state = 17;
                     break;
 
@@ -361,7 +367,7 @@ TOKEN tokenizer()
                     break;
 
         case 16:    character = getCharacter();
-                    if(lowercase(character)) state = 16;
+                    if(isLowercase(character)) state = 16;
                     else state = 17;
                     break;
 
