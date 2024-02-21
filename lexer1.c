@@ -11,9 +11,9 @@
 // State for dfa
 int state = 0;
 
-int lexemeBegin, forwardPtr;
-int tokenSize = 0;
-int lineNo = 0;
+int lexemeBegin,forwardPtr;
+int tokenSize=0;
+int lineNo=1;
 
 // Twin buffer
 char buffer[2 * BUFFER_SIZE];
@@ -39,135 +39,77 @@ int isLowercase(char c)
     return islower(c) != 0;
 }
 
-const char *tokenToString(tokName token)
-{
-    switch (token)
-    {
-    case TK_ASSIGNOP:
-        return "TK_ASSIGNOP";
-    case TK_COMMENT:
-        return "TK_COMMENT";
-    case TK_FIELDID:
-        return "TK_FIELDID";
-    case TK_ID:
-        return "TK_ID";
-    case TK_NUM:
-        return "TK_NUM";
-    case TK_RNUM:
-        return "TK_RNUM";
-    case TK_FUNID:
-        return "TK_FUNID";
-    case TK_RUID:
-        return "TK_RUID";
-    case TK_WITH:
-        return "TK_WITH";
-    case TK_PARAMETERS:
-        return "TK_PARAMETERS";
-    case TK_END:
-        return "TK_END";
-    case TK_WHILE:
-        return "TK_WHILE";
-    case TK_UNION:
-        return "TK_UNION";
-    case TK_ENDUNION:
-        return "TK_ENDUNION";
-    case TK_DEFINETYPE:
-        return "TK_DEFINETYPE";
-    case TK_AS:
-        return "TK_AS";
-    case TK_TYPE:
-        return "TK_TYPE";
-    case TK_MAIN:
-        return "TK_MAIN";
-    case TK_GLOBAL:
-        return "TK_GLOBAL";
-    case TK_PARAMETER:
-        return "TK_PARAMETER";
-    case TK_LIST:
-        return "TK_LIST";
-    case TK_SQL:
-        return "TK_SQL";
-    case TK_SQR:
-        return "TK_SQR";
-    case TK_INPUT:
-        return "TK_INPUT";
-    case TK_OUTPUT:
-        return "TK_OUTPUT";
-    case TK_INT:
-        return "TK_INT";
-    case TK_REAL:
-        return "TK_REAL";
-    case TK_COMMA:
-        return "TK_COMMA";
-    case TK_SEM:
-        return "TK_SEM";
-    case TK_COLON:
-        return "TK_COLON";
-    case TK_DOT:
-        return "TK_DOT";
-    case TK_ENDWHILE:
-        return "TK_ENDWHILE";
-    case TK_OP:
-        return "TK_OP";
-    case TK_CL:
-        return "TK_CL";
-    case TK_IF:
-        return "TK_IF";
-    case TK_THEN:
-        return "TK_THEN";
-    case TK_ENDIF:
-        return "TK_ENDIF";
-    case TK_READ:
-        return "TK_READ";
-    case TK_WRITE:
-        return "TK_WRITE";
-    case TK_RETURN:
-        return "TK_RETURN";
-    case TK_PLUS:
-        return "TK_PLUS";
-    case TK_MINUS:
-        return "TK_MINUS";
-    case TK_MUL:
-        return "TK_MUL";
-    case TK_DIV:
-        return "TK_DIV";
-    case TK_CALL:
-        return "TK_CALL";
-    case TK_RECORD:
-        return "TK_RECORD";
-    case TK_ENDRECORD:
-        return "TK_ENDRECORD";
-    case TK_ELSE:
-        return "TK_ELSE";
-    case TK_AND:
-        return "TK_AND";
-    case TK_OR:
-        return "TK_OR";
-    case TK_NOT:
-        return "TK_NOT";
-    case TK_LT:
-        return "TK_LT";
-    case TK_LE:
-        return "TK_LE";
-    case TK_EQ:
-        return "TK_EQ";
-    case TK_GT:
-        return "TK_GT";
-    case TK_GE:
-        return "TK_GE";
-    case TK_NE:
-        return "TK_NE";
-    case TK_EOF:
-        return "TK_EOF";
-    default:
-        return "Unknown Token";
+const char* tokenToString(tokName token) {
+    switch(token) {
+        case TK_ASSIGNOP: return "TK_ASSIGNOP";
+        case TK_COMMENT: return "TK_COMMENT";
+        case TK_FIELDID: return "TK_FIELDID";
+        case TK_ID: return "TK_ID";
+        case TK_NUM: return "TK_NUM";
+        case TK_RNUM: return "TK_RNUM";
+        case TK_FUNID: return "TK_FUNID";
+        case TK_RUID: return "TK_RUID";
+        case TK_WITH: return "TK_WITH";
+        case TK_PARAMETERS: return "TK_PARAMETERS";
+        case TK_END: return "TK_END";
+        case TK_WHILE: return "TK_WHILE";
+        case TK_UNION: return "TK_UNION";
+        case TK_ENDUNION: return "TK_ENDUNION";
+        case TK_DEFINETYPE: return "TK_DEFINETYPE";
+        case TK_AS: return "TK_AS";
+        case TK_TYPE: return "TK_TYPE";
+        case TK_MAIN: return "TK_MAIN";
+        case TK_GLOBAL: return "TK_GLOBAL";
+        case TK_PARAMETER: return "TK_PARAMETER";
+        case TK_LIST: return "TK_LIST";
+        case TK_SQL: return "TK_SQL";
+        case TK_SQR: return "TK_SQR";
+        case TK_INPUT: return "TK_INPUT";
+        case TK_OUTPUT: return "TK_OUTPUT";
+        case TK_INT: return "TK_INT";
+        case TK_REAL: return "TK_REAL";
+        case TK_COMMA: return "TK_COMMA";
+        case TK_SEM: return "TK_SEM";
+        case TK_COLON: return "TK_COLON";
+        case TK_DOT: return "TK_DOT";
+        case TK_ENDWHILE: return "TK_ENDWHILE";
+        case TK_OP: return "TK_OP";
+        case TK_CL: return "TK_CL";
+        case TK_IF: return "TK_IF";
+        case TK_THEN: return "TK_THEN";
+        case TK_ENDIF: return "TK_ENDIF";
+        case TK_READ: return "TK_READ";
+        case TK_WRITE: return "TK_WRITE";
+        case TK_RETURN: return "TK_RETURN";
+        case TK_PLUS: return "TK_PLUS";
+        case TK_MINUS: return "TK_MINUS";
+        case TK_MUL: return "TK_MUL";
+        case TK_DIV: return "TK_DIV";
+        case TK_CALL: return "TK_CALL";
+        case TK_RECORD: return "TK_RECORD";
+        case TK_ENDRECORD: return "TK_ENDRECORD";
+        case TK_ELSE: return "TK_ELSE";
+        case TK_AND: return "TK_AND";
+        case TK_OR: return "TK_OR";
+        case TK_NOT: return "TK_NOT";
+        case TK_LT: return "TK_LT";
+        case TK_LE: return "TK_LE";
+        case TK_EQ: return "TK_EQ";
+        case TK_GT: return "TK_GT";
+        case TK_GE: return "TK_GE";
+        case TK_NE: return "TK_NE";
+        case TK_EOF: return "TK_EOF";
+        case TK_ERROR: return "TK_ERROR";
+
+        default: return "Unknown Token";
     }
 }
 
-int populateBuffer(int whichBuffer)
-{
-    if (whichBuffer == 0)
-    {
+
+
+
+int populateBuffer(int whichBuffer){
+    if(whichBuffer==0){
         fread(buffer, BUFFER_SIZE, 1, filePointer);
         // printf("%s \n", buffer);
     }
@@ -235,6 +177,7 @@ char *tokenFromPtrs()
     {
         strncat(finalToken, buffer, length2);
     }
+    lexemeBegin=forwardPtr;
 
     return finalToken;
 }
@@ -249,14 +192,11 @@ TOKEN tokenizer()
     while (true)
     {
         // printf("1");
-
-        switch (state)
-        {
-        case 0:
-            character = getCharacter();
-            if (0)
-            {
-            }
+        
+        switch(state){
+            case 0:
+                character=getCharacter();
+                if(0){}
 
             else if (character == '_')
                 state = 18;
@@ -583,22 +523,24 @@ TOKEN tokenizer()
             break;
 
         case 51:
-            token.name = TK_OP;
-            strcpy(token.string, "(");
-            token.lineNo = lineNo;
-            state = 0;
-            lexemeBegin = forwardPtr;
-            return token;
-            break;
+                token.name=TK_OP;
+                strcpy(token.string,"(");
+                token.lineNo=lineNo;
+                state=0;
+                lexemeBegin=forwardPtr;
+                return token;
+                break;
 
-        case 52:
-            token.name = TK_CL;
-            strcpy(token.string, ")");
-            token.lineNo = lineNo;
-            state = 0;
-            lexemeBegin = forwardPtr;
-            return token;
-            break;
+
+
+            case 52:
+                token.name=TK_CL;
+                strcpy(token.string,")");
+                token.lineNo=lineNo;
+                state=0;
+                lexemeBegin=forwardPtr;
+                return token;
+                break;
 
         case 53:
             token.name = TK_PLUS;

@@ -66,7 +66,8 @@ typedef enum {
     TK_GT,
     TK_GE,
     TK_NE,
-    TK_EOF // To detect that file has terminated
+    TK_EOF, // To detect that file has terminated
+    TK_ERROR
 } tokName;
 
 
@@ -80,7 +81,6 @@ typedef struct token {
     };
 
 } TOKEN;
-
 
 
 #endif
