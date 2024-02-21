@@ -6,7 +6,7 @@
 // #include "helperFunc.c"
 #include <ctype.h>
 
-#define BUFFER_SIZE 50
+#define BUFFER_SIZE 1000
 
 // State for dfa
 int state = 0;
@@ -782,10 +782,9 @@ TOKEN tokenizer()
             if (character == '\n')
             {
                 // printf("%d",forwardPtr);
-                lineNo++;
-                state = 0;
+                state=62;
             }
-            if (character == EOF)
+            else if (character == EOF)
             {
                 token.name = TK_EOF;
                 return token;
