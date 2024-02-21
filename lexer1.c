@@ -197,12 +197,28 @@ TOKEN tokenizer()
             case 0:
                 character=getCharacter();
                 if(0){}
-
+            else if(isDigit(character))
+                state = 1;
+            else if(character=='b' || character=='c' || character=='d')
+                state = 12;
+            else if(isLowercase(character)&&character!='b' && character!='c' && character!='d')
+                state = 16;
+            else if(character == '<')
+                state = 25;
+            else if(character == '=')
+                state = 32;
+            else if(character == '>')
+                state = 34;
+            else if(character == '!')
+                state = 37;
+            else if(character == '@')
+                state = 39;
+            else if(character == '&')
+                state = 42;
             else if (character == '_')
                 state = 18;
             else if (character == '#')
                 state = 22;
-
             else if (character == '[')
                 state = 45;
             else if (character == ']')
@@ -229,7 +245,6 @@ TOKEN tokenizer()
                 state = 56;
             else if (character == '~')
                 state = 57;
-
             else if (character == '%')
                 state = 61;
 
@@ -242,6 +257,98 @@ TOKEN tokenizer()
             }
 
             break;
+        
+        case 1: c = getCharacter();
+                if(c == '.') state = 2;
+                else if(isdigit(c)) state = 1;
+                else state = 9;
+                break;
+            
+        case 2: c = getCharacter();
+                if(isdigit(c)) state = 3;
+                else state = 10;
+                break;
+
+        case 3: c = getCharacter();
+                if(isdigit(c)) state = 4;
+                else exit(0);  // Error
+                break;
+
+        case 4: c = getCharacter();
+                if (c == 'E') state = 5;
+                else state = 11;
+                break;
+
+        case 5: c = getCharacter();
+                if (c == '+' || c == '-') state = 6;
+                else if (isdigit(c)) state = 7;
+                else exit(0);  // Error
+                break;
+
+        case 6: c = getCharacter();
+                if (isdigit(c)) state = 7;
+                else exit(0);  // Error
+                break;
+
+        case 7: c = getCharacter();
+                if (isdigit(c)) state = 8;
+                else exit(0);
+                break;
+
+        case 8: // TK_RNUM
+                mytoken.token == "TK_RNUM"
+                mytoken.value = get_num_string();
+                return mytoken;
+
+        case 9: //TK_NUM    
+                retract(1); 
+                mytoken.token = "TK_NUM"
+                mytoken.value = get_num_string();
+                return mytoken;
+
+        case 10: //TK_NUM
+                retract(2);
+                mytoken.token = "TK_NUM"
+                mytoken.value = get_num_string();
+                return mytoken;
+
+        case 11: //TK_RNUM
+                retract(1);
+                mytoken.token = "TK_RNUM"
+                mytoken.value = get_num_string();
+                return mytoken;
+
+        case 12:    c = getCharacter();
+                    if(digit_2to7(c)) state = 13;
+                    else if(lowercase(c)) state = 16;
+                    else state = 17;
+                    break;
+
+        case 13:    c = getCharacter();
+                    if(c=='b' || c=='c' || c=='d') state = 13;
+                    else if(digit_2to7(c)) state = 14;
+                    else state = 15;
+                    break;
+
+        case 14:    c = getCharacter();
+                    if(digit_2to7(c)) state = 14;
+                    else state = 15;
+                    break;
+
+        case 15:    retract(1); //TK_ID
+                    mytoken.token = search_token();
+                    if(mytoken.token == IDENTIFIER) mytoken.value = get_id_string();
+                    return mytoken;
+
+        case 16:    c = getCharacter();
+                    if(lowercase(c)) state = 16;
+                    else state = 17;
+                    break;
+                    
+        case 17:    retract(1); //TK_FIELDID
+                    mytoken.token = search_token();
+                    if(mytoken.token == IDENTIFIER) mytoken.value = get_id_string();
+                    return mytoken;
 
         case 18:
             character = getCharacter();
