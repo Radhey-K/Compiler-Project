@@ -21,7 +21,7 @@ FILE *filePointer;
 
 int isDigit(char c)
 {
-    return isDigit(c) != 0;
+    return isdigit(c);
 }
 
 int isLetter(char c)
@@ -465,7 +465,7 @@ TOKEN tokenizer()
 
         case 28:
             token.name = TK_ASSIGNOP;
-            strcpy(token.string, tokenFromPtrs);
+            strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
             state = 0;
             lexemeBegin = forwardPtr;
@@ -475,7 +475,7 @@ TOKEN tokenizer()
         case 29:
             // retraction needed
             token.name = TK_LT;
-            strcpy(token.string, tokenFromPtrs);
+            strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
             state = 0;
             lexemeBegin = forwardPtr;
@@ -484,7 +484,7 @@ TOKEN tokenizer()
 
         case 30:
             token.name = TK_LT;
-            strcpy(token.string, tokenFromPtrs);
+            strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
             state = 0;
             lexemeBegin = forwardPtr;
@@ -493,7 +493,7 @@ TOKEN tokenizer()
 
         case 31:
             token.name = TK_LE;
-            strcpy(token.string, tokenFromPtrs);
+            strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
             state = 0;
             lexemeBegin = forwardPtr;
@@ -729,7 +729,10 @@ TOKEN tokenizer()
 
         // Error state. Need to change.
         case 60:
-            token.name = TK_EOF;
+            token.name = TK_ERROR;
+            token.lineNo = lineNo;
+            state = 0;
+            lexemeBegin = forwardPtr;
             return token;
             break;
 
