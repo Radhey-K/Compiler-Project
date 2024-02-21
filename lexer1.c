@@ -258,97 +258,121 @@ TOKEN tokenizer()
 
             break;
         
-        case 1: c = getCharacter();
-                if(c == '.') state = 2;
-                else if(isdigit(c)) state = 1;
+        case 1: character = getCharacter();
+                if(character == '.') state = 2;
+                else if(isdigit(character)) state = 1;
                 else state = 9;
                 break;
             
-        case 2: c = getCharacter();
-                if(isdigit(c)) state = 3;
+        case 2: character = getCharacter();
+                if(isdigit(character)) state = 3;
                 else state = 10;
                 break;
 
-        case 3: c = getCharacter();
-                if(isdigit(c)) state = 4;
+        case 3: character = getCharacter();
+                if(isdigit(character)) state = 4;
                 else exit(0);  // Error
                 break;
 
-        case 4: c = getCharacter();
-                if (c == 'E') state = 5;
+        case 4: character = getCharacter();
+                if (character == 'E') state = 5;
                 else state = 11;
                 break;
 
-        case 5: c = getCharacter();
-                if (c == '+' || c == '-') state = 6;
-                else if (isdigit(c)) state = 7;
+        case 5: character = getCharacter();
+                if (character == '+' || character == '-') state = 6;
+                else if (isdigit(character)) state = 7;
                 else exit(0);  // Error
                 break;
 
-        case 6: c = getCharacter();
-                if (isdigit(c)) state = 7;
+        case 6: character = getCharacter();
+                if (isdigit(character)) state = 7;
                 else exit(0);  // Error
                 break;
 
-        case 7: c = getCharacter();
-                if (isdigit(c)) state = 8;
+        case 7: character = getCharacter();
+                if (isdigit(character)) state = 8;
                 else exit(0);
                 break;
 
         case 8: // TK_RNUM
-                mytoken.token == "TK_RNUM"
-                mytoken.value = get_num_string();
-                return mytoken;
+                token.name = TK_RNUM;
+                strcpy(token.string, tokenFromPtrs());
+                token.lineNo = lineNo;
+                state = 0;
+                lexemeBegin = forwardPtr;
+                return token;
+                break;
 
         case 9: //TK_NUM    
                 retract(1); 
-                mytoken.token = "TK_NUM"
-                mytoken.value = get_num_string();
-                return mytoken;
+                token.name = TK_NUM;
+                token.integer = atoi(tokenFromPtrs());
+                token.lineNo = lineNo;
+                state = 0;
+                lexemeBegin = forwardPtr;
+                return token;
+                break;
 
         case 10: //TK_NUM
                 retract(2);
-                mytoken.token = "TK_NUM"
-                mytoken.value = get_num_string();
-                return mytoken;
+                token.name = TK_NUM;
+                token.integer = atoi(tokenFromPtrs());
+                token.lineNo = lineNo;
+                state = 0;
+                lexemeBegin = forwardPtr;
+                return token;
+                break;
 
         case 11: //TK_RNUM
                 retract(1);
-                mytoken.token = "TK_RNUM"
-                mytoken.value = get_num_string();
-                return mytoken;
+                token.name = TK_RNUM;
+                token.realNum = atof(tokenFromPtrs());
+                token.lineNo = lineNo;
+                state = 0;
+                lexemeBegin = forwardPtr;
+                return token;
+                break;
 
-        case 12:    c = getCharacter();
-                    if(digit_2to7(c)) state = 13;
-                    else if(lowercase(c)) state = 16;
+        case 12:    character = getCharacter();
+                    if(digit_2to7(character)) state = 13;
+                    else if(lowercase(character)) state = 16;
                     else state = 17;
                     break;
 
-        case 13:    c = getCharacter();
-                    if(c=='b' || c=='c' || c=='d') state = 13;
-                    else if(digit_2to7(c)) state = 14;
+        case 13:    character = getCharacter();
+                    if(character=='b' || character=='c' || character=='d') state = 13;
+                    else if(digit_2to7(character)) state = 14;
                     else state = 15;
                     break;
 
-        case 14:    c = getCharacter();
-                    if(digit_2to7(c)) state = 14;
+        case 14:    character = getCharacter();
+                    if(digit_2to7(character)) state = 14;
                     else state = 15;
                     break;
 
         case 15:    retract(1); //TK_ID
-                    mytoken.token = search_token();
-                    if(mytoken.token == IDENTIFIER) mytoken.value = get_id_string();
-                    return mytoken;
+                    token.name = TK_ID;
+                    strcpy(token.string, tokenFromPtrs());
+                    token.lineNo = lineNo;
+                    state = 0;
+                    lexemeBegin = forwardPtr;
+                    return token;
+                    break;
 
-        case 16:    c = getCharacter();
-                    if(lowercase(c)) state = 16;
+        case 16:    character = getCharacter();
+                    if(lowercase(character)) state = 16;
                     else state = 17;
                     break;
 
         case 17:    retract(1); //TK_FIELDID
-                    mytoken.token = search_token();
-                    if(mytoken.token == IDENTIFIER) mytoken.value = get_id_string();
-                    return mytoken;
+                    token.name = TK_FIELDID;
+                    strcpy(token.string, tokenFromPtrs());
+                    token.lineNo = lineNo;
+                    state = 0;
+                    lexemeBegin = forwardPtr;
+                    return token;
+                    break;
 
         case 18:
             character = getCharacter();
