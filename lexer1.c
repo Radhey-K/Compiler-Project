@@ -215,6 +215,8 @@ TOKEN tokenizer()
 {
     char character;
     TOKEN token;
+    token.integer = -1;
+    token.realNum = -1;
     token.string = malloc(sizeof(char) * 20);
     // Need to initialize the lexemeBegin and forwardPtrs too
     while (true)
@@ -335,7 +337,8 @@ TOKEN tokenizer()
         case 9: //TK_NUM    
                 retract(1); 
                 token.name = TK_NUM;
-                token.integer = atoi(tokenFromPtrs());
+                strcpy(token.string, tokenFromPtrs());
+                token.integer = atoi(token.string);
                 token.lineNo = lineNo;
                 state = 0;
                 lexemeBegin = forwardPtr;
@@ -345,7 +348,8 @@ TOKEN tokenizer()
         case 10: //TK_NUM
                 retract(2);
                 token.name = TK_NUM;
-                token.integer = atoi(tokenFromPtrs());
+                strcpy(token.string, tokenFromPtrs());
+                token.integer = atoi(token.string);
                 token.lineNo = lineNo;
                 state = 0;
                 lexemeBegin = forwardPtr;
@@ -355,7 +359,8 @@ TOKEN tokenizer()
         case 11: //TK_RNUM
                 retract(1);
                 token.name = TK_RNUM;
-                token.realNum = atof(tokenFromPtrs());
+                strcpy(token.string, tokenFromPtrs());
+                token.realNum = atof(token.string);
                 token.lineNo = lineNo;
                 state = 0;
                 lexemeBegin = forwardPtr;
@@ -760,8 +765,10 @@ TOKEN tokenizer()
 
         // Error state. Need to change.
         case 60:
+            retract(1);
             token.name = TK_ERROR;
             token.lineNo = lineNo;
+            strcpy(token.string, tokenFromPtrs());
             state = 0;
             lexemeBegin = forwardPtr;
             return token;
@@ -811,7 +818,13 @@ int main()
     while (buffer[forwardPtr] != EOF)
     {
         TOKEN token = tokenizer();
-        printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
+        // if (token.integer != -1)
+        //     printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
+        // else if (token.realNum != -1)
+        //     printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
+        // else
+            printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
+
         if (token.name == TK_EOF)
             break;
     }

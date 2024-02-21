@@ -74,11 +74,9 @@ typedef enum {
 typedef struct token {
     tokName name; //should be an enum
     int lineNo;
-    union {
-        char* string;
-        int integer;
-        float realNum;
-    };
+    char* string;
+    int integer;
+    float realNum;
 
 } TOKEN;
 
