@@ -57,7 +57,7 @@ void table_insert(ST stable, char *lexeme, tokName tk_type){
      * @param tktype Enum, token_type
      */
 
-    if (strlen(lexeme) > max(MAX_FUN_ID_SIZE, MAX_RU_ID_SIZE, MAX_VAR_ID_SIZE)) {
+    if (strlen(lexeme) > max(MAX_FUN_ID_SIZE, MAX_VAR_ID_SIZE)) {
         print("Insertion error - max lexeme length exceeded");
         return;
     }

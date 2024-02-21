@@ -3,7 +3,7 @@
 
 #define MAX_VAR_ID_SIZE 20
 #define MAX_FUN_ID_SIZE 30
-#define MAX_RU_ID_SIZE 20
+// #define MAX_RU_ID_SIZE 20
 
 
 //Need to add more
