@@ -5,6 +5,7 @@
 #include "lexer.h"
 // #include "helperFunc.c"
 #include <ctype.h>
+#include <time.h>
 
 #define BUFFER_SIZE 1000
 
@@ -806,6 +807,10 @@ TOKEN tokenizer()
 
 int main()
 {
+    clock_t start_time, end_time;
+    double total_CPU_time, total_CPU_time_in_seconds;
+    start_time = clock();
+
     filePointer = fopen("test.txt", "r");
     populateBuffer(0);
     populateBuffer(1);
@@ -827,4 +832,10 @@ int main()
         if (token.name == TK_EOF)
             break;
     }
+
+    end_time = clock();
+    total_CPU_time = (double) (end_time - start_time);
+    total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
+    printf("Total CPU time: %f\n", total_CPU_time);
+    printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
 }
