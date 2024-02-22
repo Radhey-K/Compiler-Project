@@ -806,25 +806,27 @@ TOKEN tokenizer()
 
 int main()
 {
-    filePointer = fopen("test.txt", "r");
-    populateBuffer(0);
-    populateBuffer(1);
-    lexemeBegin = 0;
-    forwardPtr = 0;
-    // printf("%s",tokenFromPtrs());
-    // printf("%c",buffer[forwardPtr]);
+    // filePointer = fopen("test.txt", "r");
+    // populateBuffer(0);
+    // populateBuffer(1);
+    // lexemeBegin = 0;
+    // forwardPtr = 0;
+    // // printf("%s",tokenFromPtrs());
+    // // printf("%c",buffer[forwardPtr]);
 
-    while (buffer[forwardPtr] != EOF)
-    {
-        TOKEN token = tokenizer();
-        // if (token.integer != -1)
-        //     printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
-        // else if (token.realNum != -1)
-        //     printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
-        // else
-            printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
+    // while (buffer[forwardPtr] != EOF)
+    // {
+    //     TOKEN token = tokenizer();
+    //     // if (token.integer != -1)
+    //     //     printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
+    //     // else if (token.realNum != -1)
+    //     //     printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
+    //     // else
+    //         printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
 
-        if (token.name == TK_EOF)
-            break;
-    }
+    //     if (token.name == TK_EOF)
+    //         break;
+    // }
+    int test[5]={1,2,3,4,5};
+    printf("%d",test[TK_UNKNOWN]);
 }
