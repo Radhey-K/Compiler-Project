@@ -5,6 +5,7 @@
 #include "lexer.h"
 // #include "helperFunc.c"
 #include <ctype.h>
+#include <time.h>
 
 #define BUFFER_SIZE 1000
 
@@ -806,13 +807,17 @@ TOKEN tokenizer()
 
 int main()
 {
-    // filePointer = fopen("test.txt", "r");
-    // populateBuffer(0);
-    // populateBuffer(1);
-    // lexemeBegin = 0;
-    // forwardPtr = 0;
-    // // printf("%s",tokenFromPtrs());
-    // // printf("%c",buffer[forwardPtr]);
+    clock_t start_time, end_time;
+    double total_CPU_time, total_CPU_time_in_seconds;
+    start_time = clock();
+
+    filePointer = fopen("test.txt", "r");
+    populateBuffer(0);
+    populateBuffer(1);
+    lexemeBegin = 0;
+    forwardPtr = 0;
+    // printf("%s",tokenFromPtrs());
+    // printf("%c",buffer[forwardPtr]);
 
     // while (buffer[forwardPtr] != EOF)
     // {
@@ -824,9 +829,13 @@ int main()
     //     // else
     //         printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
 
-    //     if (token.name == TK_EOF)
-    //         break;
-    // }
-    int test[5]={1,2,3,4,5};
-    printf("%d",test[TK_UNKNOWN]);
+        if (token.name == TK_EOF)
+            break;
+    }
+
+    end_time = clock();
+    total_CPU_time = (double) (end_time - start_time);
+    total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
+    printf("Total CPU time: %f\n", total_CPU_time);
+    printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
 }
