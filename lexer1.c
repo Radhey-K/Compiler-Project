@@ -819,9 +819,9 @@ int main()
     // printf("%s",tokenFromPtrs());
     // printf("%c",buffer[forwardPtr]);
 
-    // while (buffer[forwardPtr] != EOF)
-    // {
-    //     TOKEN token = tokenizer();
+    while (buffer[forwardPtr] != EOF)
+    {
+        TOKEN token = tokenizer();
     //     // if (token.integer != -1)
     //     //     printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
     //     // else if (token.realNum != -1)
