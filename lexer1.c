@@ -164,6 +164,7 @@ void retract(int noOfRetractions)
 }
 
 // Returns the actual token from when the accept state is reached with help of lexemeBegin and forwardPtr
+// we cannot handle characters other than mentioned in grammar
 char *tokenFromPtrs()
 {
     int bufferSize = BUFFER_SIZE * 2;
@@ -230,6 +231,7 @@ TOKEN tokenizer(ST stable)
             case 0:
                 character=getCharacter();
                 if(0){}
+            else if(character==' ') state=58;
             else if(isDigit(character))
                 state = 1;
             else if(character=='b' || character=='c' || character=='d')
@@ -510,6 +512,7 @@ TOKEN tokenizer(ST stable)
                 state = 31;
             else
                 state = 29;
+            break;
 
         case 26:
             character = getCharacter();
@@ -517,6 +520,7 @@ TOKEN tokenizer(ST stable)
                 state = 27;
             else
                 state = 30;
+            break;
 
         case 27:
             character = getCharacter();
@@ -524,6 +528,7 @@ TOKEN tokenizer(ST stable)
                 state = 28;
             else
                 state = 60;
+            break;
 
         case 28:
             token.name = TK_ASSIGNOP;
@@ -585,6 +590,7 @@ TOKEN tokenizer(ST stable)
                 state = 35;
             else
                 state = 36;
+            break;
 
         case 35:
             token.name = TK_GE;
@@ -611,6 +617,7 @@ TOKEN tokenizer(ST stable)
                 state = 38;
             else
                 state = 60;
+            break;
 
         case 38:
             token.name = TK_NE;
@@ -650,6 +657,7 @@ TOKEN tokenizer(ST stable)
                 state = 43;
             else
                 state = 60;
+            break;
 
         case 43:
             character = getCharacter();
@@ -657,6 +665,7 @@ TOKEN tokenizer(ST stable)
                 state = 44;
             else
                 state = 60;
+            break;
 
         case 44:
             token.name = TK_AND;
@@ -732,14 +741,14 @@ TOKEN tokenizer(ST stable)
 
 
 
-            case 52:
-                token.name=TK_CL;
-                strcpy(token.string,")");
-                token.lineNo=lineNo;
-                state=0;
-                lexemeBegin=forwardPtr;
-                return token;
-                break;
+        case 52:
+            token.name=TK_CL;
+            strcpy(token.string,")");
+            token.lineNo=lineNo;
+            state=0;
+            lexemeBegin=forwardPtr;
+            return token;
+            break;
 
         case 53:
             token.name = TK_PLUS;
@@ -787,6 +796,9 @@ TOKEN tokenizer(ST stable)
             break;
 
         case 58:
+            lexemeBegin=forwardPtr;
+            state=0;
+            break;
         case 59:
 
         // Error state. Need to change.
@@ -851,12 +863,12 @@ int main()
     while (buffer[forwardPtr] != EOF)
     {
         TOKEN token = tokenizer(stable);
-    //     // if (token.integer != -1)
-    //     //     printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
-    //     // else if (token.realNum != -1)
-    //     //     printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
-    //     // else
-    //         printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
+        if (token.integer != -1)
+            printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
+        else if (token.realNum != -1)
+            printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
+        else
+            printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
 
         if (token.name == TK_EOF)
             break;
