@@ -8,6 +8,7 @@
 
 #define LEXEME_MAX_CHARS 30
 #define TABLE_SIZE 197
+#include "lexer.h"
 
 typedef struct st_element * ST_ELEMENT;
 typedef struct symbol_table st;
@@ -34,5 +35,7 @@ int hash_lexeme(char *lexeme);
 void table_insert(ST stable, char *lexeme, tokName tk_type);
 
 ST_ELEMENT table_lookup(ST stable, char *lexeme);
+
+void populate_symbol_table(ST stable);
 
 #endif

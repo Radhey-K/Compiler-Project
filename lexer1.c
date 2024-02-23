@@ -6,6 +6,7 @@
 // #include "helperFunc.c"
 #include <ctype.h>
 #include <time.h>
+#include "symbol_table.h"
 
 #define BUFFER_SIZE 1000
 
@@ -212,13 +213,14 @@ int lexeme_length(){
 }
 
 // If there is any error send to error state
-TOKEN tokenizer()
+TOKEN tokenizer(ST stable)
 {
     char character;
     TOKEN token;
     token.integer = -1;
     token.realNum = -1;
     token.string = malloc(sizeof(char) * 20);
+    ST_ELEMENT ele; // for lookup
     // Need to initialize the lexemeBegin and forwardPtrs too
     while (true)
     {
@@ -395,6 +397,10 @@ TOKEN tokenizer()
                     token.lineNo = lineNo;
                     state = 0;
                     lexemeBegin = forwardPtr;
+                    ele = table_lookup(stable, token.string);
+                    if (ele == NULL) {
+                        table_insert(stable, token.string, token.name);
+                    }
                     return token;
                     break;
 
@@ -409,6 +415,14 @@ TOKEN tokenizer()
                     token.lineNo = lineNo;
                     state = 0;
                     lexemeBegin = forwardPtr;
+                    // TK_FIELDID may clash with keywords
+                    ele = table_lookup(stable, token.string);
+                    if (ele == NULL) {
+                        table_insert(stable, token.string, token.name);
+                    }else {
+                        // If its a re-used field_name --> type assignment won't change anything (else will give the corresponding reserved word token type)
+                        token.name = ele->tk_type;
+                    }
                     return token;
                     break;
 
@@ -449,6 +463,13 @@ TOKEN tokenizer()
             token.lineNo = lineNo;
             state = 0;
             lexemeBegin = forwardPtr;
+            ele = table_lookup(stable, token.string);
+            if (ele == NULL) {
+                table_insert(stable, token.string, token.name);
+            }else {
+                // For clash with _main (or will assign TK_FUNID itself)
+                token.name = ele->tk_type;
+            }
             return token;
             break;
 
@@ -474,6 +495,10 @@ TOKEN tokenizer()
             token.lineNo = lineNo;
             state = 0;
             lexemeBegin = forwardPtr;
+            ele = table_lookup(stable, token.string);
+            if (ele == NULL) {
+                table_insert(stable, token.string, token.name);
+            }
             return token;
             break;
 
@@ -819,9 +844,13 @@ int main()
     // printf("%s",tokenFromPtrs());
     // printf("%c",buffer[forwardPtr]);
 
+    // Initalize and pre-populate symbol table
+    ST stable = create_symbol_table();
+    populate_symbol_table(stable);
+
     while (buffer[forwardPtr] != EOF)
     {
-        TOKEN token = tokenizer();
+        TOKEN token = tokenizer(stable);
     //     // if (token.integer != -1)
     //     //     printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
     //     // else if (token.realNum != -1)
@@ -838,4 +867,5 @@ int main()
     total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
     printf("Total CPU time: %f\n", total_CPU_time);
     printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
+    printf("Symbol table entries (includes prepopulation 51) : %d \n", stable->token_count);
 }
