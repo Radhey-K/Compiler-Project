@@ -70,6 +70,18 @@ typedef enum {
     TK_ERROR
 } tokName;
 
+typedef enum
+{
+    E,
+    E1,
+    T,
+    T1,
+    F,
+    program,
+    otherFunctions,
+    mainFunction,
+    stmts
+} nonterminal;
 
 typedef struct token {
     tokName name; //should be an enum
