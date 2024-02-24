@@ -114,6 +114,64 @@ const char* tokenToString(tokName token) {
     }
 }
 
+const char* nonterminaltoString(nonterminal nt) {
+    switch(nt) {
+        case program: return "<program>";
+        case otherFunctions: return "<otherFunctions>";
+        case mainFunction: return "<mainFunction>";
+        case stmts: return "<stmts>";
+        case function: return "<function>";
+        case input_par: return "<input_par>";
+        case output_par: return "<output_par>";
+        case parameter_list: return "<parameter_list>";
+        case dataType: return "<dataType>";
+        case primitiveDatatype: return "<primitiveDatatype>";
+        case constructedDatatype: return "<constructedDatatype>";
+        case remaining_list: return "<remaining_list>";
+        case typeDefinitions: return "<typeDefinitions>";
+        case actualOrRedefined: return "<actualOrRedefined>";
+        case typeDefinition: return "<typeDefinition>";
+        case fieldDefinitions: return "<fieldDefinitions>";
+        case fieldDefinition: return "<fieldDefinition>";
+        case fieldType: return "<fieldType>";
+        case moreFields: return "<moreFields>";
+        case declarations: return "<declarations>";
+        case declaration: return "<declaration>";
+        case global_or_not: return "<global_or_not>";
+        case otherStmts: return "<otherStmts>";
+        case stmt: return "<stmt>";
+        case assignmentStmt: return "<assignmentStmt>";
+        case SingleOrRecId: return "<SingleOrRecId>";
+        case option_single_constructed: return "<option_single_constructed>";
+        case oneExpansion: return "<oneExpansion>";
+        case moreExpansions: return "<moreExpansions>";
+        case funCallStmt: return "<funCallStmt>";
+        case outputParameters: return "<outputParameters>";
+        case inputParameters: return "<inputParameters>";
+        case iterativeStmt: return "<iterativeStmt>";
+        case conditionalStmt: return "<conditionalStmt>";
+        case elsePart: return "<elsePart>";
+        case ioStmt: return "<ioStmt>";
+        case arithmeticExpression: return "<arithmeticExpression>";
+        case expPrime: return "<expPrime>";
+        case term: return "<term>";
+        case termPrime: return "<termPrime>";
+        case factor: return "<factor>";
+        case highPrecedenceOperator: return "<highPrecedenceOperator>";
+        case lowPrecedenceOperators: return "<lowPrecedenceOperators>";
+        case booleanExpression: return "<booleanExpression>";
+        case var: return "<var>";
+        case logicalOp: return "<logicalOp>";
+        case relationalOp: return "<relationalOp>";
+        case returnStmt: return "<returnStmt>";
+        case optionalReturn: return "<optionalReturn>";
+        case idList: return "<idList>";
+        case more_ids: return "<more_ids>";
+        case definetypestmt: return "<definetypestmt>";
+        case A: return "<A>";
+        default: return "Unknown";
+    }
+}
 
 
 
@@ -843,42 +901,42 @@ TOKEN tokenizer(ST stable)
     }
 }
 
-int main()
-{
-    clock_t start_time, end_time;
-    double total_CPU_time, total_CPU_time_in_seconds;
-    start_time = clock();
+// int main()
+// {
+//     clock_t start_time, end_time;
+//     double total_CPU_time, total_CPU_time_in_seconds;
+//     start_time = clock();
 
-    filePointer = fopen("test.txt", "r");
-    populateBuffer(0);
-    populateBuffer(1);
-    lexemeBegin = 0;
-    forwardPtr = 0;
-    // printf("%s",tokenFromPtrs());
-    // printf("%c",buffer[forwardPtr]);
+//     filePointer = fopen("test.txt", "r");
+//     populateBuffer(0);
+//     populateBuffer(1);
+//     lexemeBegin = 0;
+//     forwardPtr = 0;
+//     // printf("%s",tokenFromPtrs());
+//     // printf("%c",buffer[forwardPtr]);
 
-    // Initalize and pre-populate symbol table
-    ST stable = create_symbol_table();
-    populate_symbol_table(stable);
+//     // Initalize and pre-populate symbol table
+//     ST stable = create_symbol_table();
+//     populate_symbol_table(stable);
 
-    while (buffer[forwardPtr] != EOF)
-    {
-        TOKEN token = tokenizer(stable);
-        if (token.integer != -1)
-            printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
-        else if (token.realNum != -1)
-            printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
-        else
-            printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
+//     while (buffer[forwardPtr] != EOF)
+//     {
+//         TOKEN token = tokenizer(stable);
+//         if (token.integer != -1)
+//             printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
+//         else if (token.realNum != -1)
+//             printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
+//         else
+//             printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
 
-        if (token.name == TK_EOF)
-            break;
-    }
+//         if (token.name == TK_EOF)
+//             break;
+//     }
 
-    end_time = clock();
-    total_CPU_time = (double) (end_time - start_time);
-    total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
-    printf("Total CPU time: %f\n", total_CPU_time);
-    printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
-    printf("Symbol table entries (includes prepopulation 51) : %d \n", stable->token_count);
-}
+//     end_time = clock();
+//     total_CPU_time = (double) (end_time - start_time);
+//     total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
+//     printf("Total CPU time: %f\n", total_CPU_time);
+//     printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
+//     printf("Symbol table entries (includes prepopulation 51) : %d \n", stable->token_count);
+// }

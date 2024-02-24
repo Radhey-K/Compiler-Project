@@ -25,8 +25,8 @@
 <typeDefinition> ===> TK_UNION TK_RUID <fieldDefinitions> TK_ENDUNION
 <fieldDefinitions> ===> <fieldDefinition> <fieldDefinition> <moreFields>
 <fieldDefinition> ===> TK_TYPE <fieldType> TK_COLON TK_FIELDID TK_SEM
-<fieldtype> ===> <primitiveDatatype>
-<fieldtype> ===> <constructedDatatype>
+<fieldType> ===> <primitiveDatatype>
+<fieldType> ===> <constructedDatatype>
 <moreFields> ===> <fieldDefinition> <moreFields>
 <moreFields> ===> TK_EPS
 <declarations> ===> <declaration> <declarations>
@@ -42,7 +42,7 @@
 <stmt> ===> <ioStmt>
 <stmt> ===> <funCallStmt>
 <assignmentStmt> ===> <SingleOrRecId> TK_ASSIGNOP <arithmeticExpression> TK_SEM
-<singleOrRecId> ===> TK_ID <option_single_constructed>
+<SingleOrRecId> ===> TK_ID <option_single_constructed>
 <option_single_constructed> ===> <oneExpansion> <moreExpansions>
 <option_single_constructed> ===> TK_EPS
 <oneExpansion> ===> TK_DOT TK_FIELDID
@@ -62,7 +62,7 @@
 <expPrime> ===> <lowPrecedenceOperators> <term> <expPrime>
 <expPrime> ===> TK_EPS
 <term> ===> <factor> <termPrime>
-<termPrime> ===> <highPrecedenceOperators> <factor> <termPrime>
+<termPrime> ===> <highPrecedenceOperator> <factor> <termPrime>
 <termPrime> ===> TK_EPS
 <factor> ===> TK_OP <arithmeticExpression> TK_CL
 <factor> ===> <var>
@@ -73,7 +73,7 @@
 <booleanExpression> ===> TK_OP <booleanExpression> TK_CL <logicalOp> TK_OP <booleanExpression> TK_CL
 <booleanExpression> ===> <var> <relationalOp> <var>
 <booleanExpression> ===> TK_NOT TK_OP <booleanExpression> TK_CL
-<var> ===> <singleOrRecId>
+<var> ===> <SingleOrRecId>
 <var> ===> TK_NUM
 <var> ===> TK_RNUM
 <logicalOp> ===> TK_AND

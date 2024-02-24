@@ -270,8 +270,8 @@ int getNonTerminal(char* token) {
     else if (strcmp(token, "<fieldDefinition>") == 0) {
         return fieldDefinition;
     }
-    else if (strcmp(token, "<fieldtype>") == 0) {
-        return fieldtype;
+    else if (strcmp(token, "<fieldType>") == 0) {
+        return fieldType;
     }
     else if (strcmp(token, "<moreFields>") == 0) {
         return moreFields;
@@ -294,8 +294,8 @@ int getNonTerminal(char* token) {
     else if (strcmp(token, "<assignmentStmt>") == 0) {
         return assignmentStmt;
     }
-    else if (strcmp(token, "<singleOrRecId>") == 0) {
-        return singleOrRecId;
+    else if (strcmp(token, "<SingleOrRecId>") == 0) {
+        return SingleOrRecId;
     }
     else if (strcmp(token, "<option_single_constructed>") == 0) {
         return option_single_constructed;
@@ -456,13 +456,13 @@ int main(){
     // printf("%d\n", rules[1].next->next->sym.nt);
     // printf("%d\n", rules[1].next->next->next->sym.nt);
     for(int i = 0; i < NUM_RULES; i++) {
-        printf("%d\t", rules[i].sym.nt);
+        printf("%s ===>", nonterminaltoString(rules[i].sym.nt));
         NODE* head = &rules[i];
         while(head->next) {
             if (head->next->sym.is_terminal) {
-                printf("%d\t", head->next->sym.t);
+                printf(" %s", tokenToString(head->next->sym.t));
             } else {
-                printf("%d\t", head->next->sym.nt);
+                printf(" %s", nonterminaltoString(head->next->sym.nt));
             }
             head = head->next;
         }

@@ -90,7 +90,7 @@ typedef enum
     typeDefinition,
     fieldDefinitions,
     fieldDefinition,
-    fieldtype,
+    fieldType,
     moreFields,
     declarations,
     declaration,
@@ -98,7 +98,7 @@ typedef enum
     otherStmts,
     stmt,
     assignmentStmt,
-    singleOrRecId,
+    SingleOrRecId,
     option_single_constructed,
     oneExpansion,
     moreExpansions,
@@ -137,5 +137,7 @@ typedef struct token {
 
 } TOKEN;
 
+const char* nonterminaltoString(nonterminal nt);
+const char* tokenToString(tokName token);
 
 #endif
