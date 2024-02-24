@@ -108,6 +108,7 @@ const char* tokenToString(tokName token) {
         case TK_NE: return "TK_NE";
         case TK_EOF: return "TK_EOF";
         case TK_ERROR: return "TK_ERROR";
+        case TK_EPS: return "TK_EPS";
 
         default: return "Unknown Token";
     }

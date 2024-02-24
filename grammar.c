@@ -1,5 +1,5 @@
 #include "lexer.h"
-#define NUM_RULES 5
+#define NUM_RULES 95
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -206,7 +206,10 @@ int getTerminal(const char* token) {
     } 
     else if (strcmp(token, "TK_EOF") == 0) {
         return TK_EOF;
-    } 
+    }
+    else if (strcmp(token, "TK_EPS") == 0) {
+        return TK_EPS;
+    }
     else if (strcmp(token, "TK_ERROR") == 0) {
         return TK_ERROR;
     }
@@ -215,24 +218,8 @@ int getTerminal(const char* token) {
     }
 }
 
-
 int getNonTerminal(char* token) {
-    if (strcmp(token, "E") == 0) {
-        return E;
-    } 
-    else if (strcmp(token, "E1") == 0) {
-        return E1;
-    } 
-    else if (strcmp(token, "T") == 0) {
-        return T;
-    } 
-    else if (strcmp(token, "T1") == 0) {
-        return T1;
-    } 
-    else if (strcmp(token, "F") == 0) {
-        return F;
-    } 
-    else if (strcmp(token, "<program>") == 0) {
+    if (strcmp(token, "<program>") == 0) {
         return program;
     } 
     else if (strcmp(token, "<otherFunctions>") == 0) {
@@ -241,10 +228,158 @@ int getNonTerminal(char* token) {
     else if (strcmp(token, "<mainFunction>") == 0) {
         return mainFunction;
     }
-    else if (strcmp(token, "<stmts>") == 0)
+    else if (strcmp(token, "<stmts>") == 0) {
         return stmts;
+    }
+    else if (strcmp(token, "<function>") == 0) {
+        return function;
+    }
+    else if (strcmp(token, "<input_par>") == 0) {
+        return input_par;
+    }
+    else if (strcmp(token, "<output_par>") == 0) {
+        return output_par;
+    }
+    else if (strcmp(token, "<parameter_list>") == 0) {
+        return parameter_list;
+    }
+    else if (strcmp(token, "<dataType>") == 0) {
+        return dataType;
+    }
+    else if (strcmp(token, "<primitiveDatatype>") == 0) {
+        return primitiveDatatype;
+    }
+    else if (strcmp(token, "<constructedDatatype>") == 0) {
+        return constructedDatatype;
+    }
+    else if (strcmp(token, "<remaining_list>") == 0) {
+        return remaining_list;
+    }
+    else if (strcmp(token, "<typeDefinitions>") == 0) {
+        return typeDefinitions;
+    }
+    else if (strcmp(token, "<actualOrRedefined>") == 0) {
+        return actualOrRedefined;
+    }
+    else if (strcmp(token, "<typeDefinition>") == 0) {
+        return typeDefinition;
+    }
+    else if (strcmp(token, "<fieldDefinitions>") == 0) {
+        return fieldDefinitions;
+    }
+    else if (strcmp(token, "<fieldDefinition>") == 0) {
+        return fieldDefinition;
+    }
+    else if (strcmp(token, "<fieldtype>") == 0) {
+        return fieldtype;
+    }
+    else if (strcmp(token, "<moreFields>") == 0) {
+        return moreFields;
+    }
+    else if (strcmp(token, "<declarations>") == 0) {
+        return declarations;
+    }
+    else if (strcmp(token, "<declaration>") == 0) {
+        return declaration;
+    }
+    else if (strcmp(token, "<global_or_not>") == 0) {
+        return global_or_not;
+    }
+    else if (strcmp(token, "<otherStmts>") == 0) {
+        return otherStmts;
+    }
+    else if (strcmp(token, "<stmt>") == 0) {
+        return stmt;
+    }
+    else if (strcmp(token, "<assignmentStmt>") == 0) {
+        return assignmentStmt;
+    }
+    else if (strcmp(token, "<singleOrRecId>") == 0) {
+        return singleOrRecId;
+    }
+    else if (strcmp(token, "<option_single_constructed>") == 0) {
+        return option_single_constructed;
+    }
+    else if (strcmp(token, "<oneExpansion>") == 0) {
+        return oneExpansion;
+    }
+    else if (strcmp(token, "<moreExpansions>") == 0) {
+        return moreExpansions;
+    }
+    else if (strcmp(token, "<funCallStmt>") == 0) {
+        return funCallStmt;
+    }
+    else if (strcmp(token, "<outputParameters>") == 0) {
+        return outputParameters;
+    }
+    else if (strcmp(token, "<inputParameters>") == 0) {
+        return inputParameters;
+    }
+    else if (strcmp(token, "<iterativeStmt>") == 0) {
+        return iterativeStmt;
+    }
+    else if (strcmp(token, "<conditionalStmt>") == 0) {
+        return conditionalStmt;
+    }
+    else if (strcmp(token, "<elsePart>") == 0) {
+        return elsePart;
+    }
+    else if (strcmp(token, "<ioStmt>") == 0) {
+        return ioStmt;
+    }
+    else if (strcmp(token, "<arithmeticExpression>") == 0) {
+        return arithmeticExpression;
+    }
+    else if (strcmp(token, "<expPrime>") == 0) {
+        return expPrime;
+    }
+    else if (strcmp(token, "<term>") == 0) {
+        return term;
+    }
+    else if (strcmp(token, "<termPrime>") == 0) {
+        return termPrime;
+    }
+    else if (strcmp(token, "<factor>") == 0) {
+        return factor;
+    }
+    else if (strcmp(token, "<highPrecedenceOperator>") == 0) {
+        return highPrecedenceOperator;
+    }
+    else if (strcmp(token, "<lowPrecedenceOperators>") == 0) {
+        return lowPrecedenceOperators;
+    }
+    else if (strcmp(token, "<booleanExpression>") == 0) {
+        return booleanExpression;
+    }
+    else if (strcmp(token, "<var>") == 0) {
+        return var;
+    }
+    else if (strcmp(token, "<logicalOp>") == 0) {
+        return logicalOp;
+    }
+    else if (strcmp(token, "<relationalOp>") == 0) {
+        return relationalOp;
+    }
+    else if (strcmp(token, "<returnStmt>") == 0) {
+        return returnStmt;
+    }
+    else if (strcmp(token, "<optionalReturn>") == 0) {
+        return optionalReturn;
+    }
+    else if (strcmp(token, "<idList>") == 0) {
+        return idList;
+    }
+    else if (strcmp(token, "<more_ids>") == 0) {
+        return more_ids;
+    }
+    else if (strcmp(token, "<definetypestmt>") == 0) {
+        return definetypestmt;
+    }
+    else if (strcmp(token, "<A>") == 0) {
+        return A;
+    }
     else {
-        return -1;
+        return -1; // Return -1 for unknown non-terminals
     }
 }
 
@@ -279,7 +414,7 @@ int main(){
     while (fscanf(fp, "%[^\n]\n", line) != EOF)
     {
         char *token = strtok(line, " |");
-        printf("%s\n", token);
+        // printf("%s\n", token);
         strcpy(lhs, token);
         // rules[i].numProductions++;
         // rules[getNonTerminal(lhs)].sym.nt = getNonTerminal(lhs);
@@ -310,16 +445,29 @@ int main(){
                     head = head->next;
                 }
             }
-            printf("%s\n", token);
+            // printf("%s\n", token);
             token = strtok(NULL, " |\r\n\t");
         }
         i++;
     }
-    printf("%d\n", rules[0].next->sym.nt);
-    printf("%d\n", rules[0].next->next->sym.nt);
-    printf("%d\n", rules[1].next->sym.nt);
-    printf("%d\n", rules[1].next->next->sym.nt);
-    printf("%d\n", rules[1].next->next->next->sym.nt);
+    // printf("%d\n", rules[0].next->sym.nt);
+    // printf("%d\n", rules[0].next->next->sym.nt);
+    // printf("%d\n", rules[1].next->sym.nt);
+    // printf("%d\n", rules[1].next->next->sym.nt);
+    // printf("%d\n", rules[1].next->next->next->sym.nt);
+    for(int i = 0; i < NUM_RULES; i++) {
+        printf("%d\t", rules[i].sym.nt);
+        NODE* head = &rules[i];
+        while(head->next) {
+            if (head->next->sym.is_terminal) {
+                printf("%d\t", head->next->sym.t);
+            } else {
+                printf("%d\t", head->next->sym.nt);
+            }
+            head = head->next;
+        }
+        printf("\n");
+    }
 }
 
 
