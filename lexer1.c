@@ -6,6 +6,7 @@
 // #include "helperFunc.c"
 #include <ctype.h>
 #include <time.h>
+#include "symbol_table.h"
 
 #define BUFFER_SIZE 1000
 
@@ -163,6 +164,7 @@ void retract(int noOfRetractions)
 }
 
 // Returns the actual token from when the accept state is reached with help of lexemeBegin and forwardPtr
+// we cannot handle characters other than mentioned in grammar
 char *tokenFromPtrs()
 {
     int bufferSize = BUFFER_SIZE * 2;
@@ -212,13 +214,14 @@ int lexeme_length(){
 }
 
 // If there is any error send to error state
-TOKEN tokenizer()
+TOKEN tokenizer(ST stable)
 {
     char character;
     TOKEN token;
     token.integer = -1;
     token.realNum = -1;
     token.string = malloc(sizeof(char) * 20);
+    ST_ELEMENT ele; // for lookup
     // Need to initialize the lexemeBegin and forwardPtrs too
     while (true)
     {
@@ -228,6 +231,7 @@ TOKEN tokenizer()
             case 0:
                 character=getCharacter();
                 if(0){}
+            else if(character==' ') state=58;
             else if(isDigit(character))
                 state = 1;
             else if(character=='b' || character=='c' || character=='d')
@@ -395,6 +399,10 @@ TOKEN tokenizer()
                     token.lineNo = lineNo;
                     state = 0;
                     lexemeBegin = forwardPtr;
+                    ele = table_lookup(stable, token.string);
+                    if (ele == NULL) {
+                        table_insert(stable, token.string, token.name);
+                    }
                     return token;
                     break;
 
@@ -409,6 +417,14 @@ TOKEN tokenizer()
                     token.lineNo = lineNo;
                     state = 0;
                     lexemeBegin = forwardPtr;
+                    // TK_FIELDID may clash with keywords
+                    ele = table_lookup(stable, token.string);
+                    if (ele == NULL) {
+                        table_insert(stable, token.string, token.name);
+                    }else {
+                        // If its a re-used field_name --> type assignment won't change anything (else will give the corresponding reserved word token type)
+                        token.name = ele->tk_type;
+                    }
                     return token;
                     break;
 
@@ -449,6 +465,13 @@ TOKEN tokenizer()
             token.lineNo = lineNo;
             state = 0;
             lexemeBegin = forwardPtr;
+            ele = table_lookup(stable, token.string);
+            if (ele == NULL) {
+                table_insert(stable, token.string, token.name);
+            }else {
+                // For clash with _main (or will assign TK_FUNID itself)
+                token.name = ele->tk_type;
+            }
             return token;
             break;
 
@@ -474,6 +497,10 @@ TOKEN tokenizer()
             token.lineNo = lineNo;
             state = 0;
             lexemeBegin = forwardPtr;
+            ele = table_lookup(stable, token.string);
+            if (ele == NULL) {
+                table_insert(stable, token.string, token.name);
+            }
             return token;
             break;
 
@@ -485,6 +512,7 @@ TOKEN tokenizer()
                 state = 31;
             else
                 state = 29;
+            break;
 
         case 26:
             character = getCharacter();
@@ -492,6 +520,7 @@ TOKEN tokenizer()
                 state = 27;
             else
                 state = 30;
+            break;
 
         case 27:
             character = getCharacter();
@@ -499,6 +528,7 @@ TOKEN tokenizer()
                 state = 28;
             else
                 state = 60;
+            break;
 
         case 28:
             token.name = TK_ASSIGNOP;
@@ -560,6 +590,7 @@ TOKEN tokenizer()
                 state = 35;
             else
                 state = 36;
+            break;
 
         case 35:
             token.name = TK_GE;
@@ -586,6 +617,7 @@ TOKEN tokenizer()
                 state = 38;
             else
                 state = 60;
+            break;
 
         case 38:
             token.name = TK_NE;
@@ -625,6 +657,7 @@ TOKEN tokenizer()
                 state = 43;
             else
                 state = 60;
+            break;
 
         case 43:
             character = getCharacter();
@@ -632,6 +665,7 @@ TOKEN tokenizer()
                 state = 44;
             else
                 state = 60;
+            break;
 
         case 44:
             token.name = TK_AND;
@@ -707,14 +741,14 @@ TOKEN tokenizer()
 
 
 
-            case 52:
-                token.name=TK_CL;
-                strcpy(token.string,")");
-                token.lineNo=lineNo;
-                state=0;
-                lexemeBegin=forwardPtr;
-                return token;
-                break;
+        case 52:
+            token.name=TK_CL;
+            strcpy(token.string,")");
+            token.lineNo=lineNo;
+            state=0;
+            lexemeBegin=forwardPtr;
+            return token;
+            break;
 
         case 53:
             token.name = TK_PLUS;
@@ -762,6 +796,9 @@ TOKEN tokenizer()
             break;
 
         case 58:
+            lexemeBegin=forwardPtr;
+            state=0;
+            break;
         case 59:
 
         // Error state. Need to change.
@@ -819,15 +856,19 @@ int main()
     // printf("%s",tokenFromPtrs());
     // printf("%c",buffer[forwardPtr]);
 
+    // Initalize and pre-populate symbol table
+    ST stable = create_symbol_table();
+    populate_symbol_table(stable);
+
     while (buffer[forwardPtr] != EOF)
     {
-        TOKEN token = tokenizer();
-    //     // if (token.integer != -1)
-    //     //     printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
-    //     // else if (token.realNum != -1)
-    //     //     printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
-    //     // else
-    //         printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
+        TOKEN token = tokenizer(stable);
+        if (token.integer != -1)
+            printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
+        else if (token.realNum != -1)
+            printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
+        else
+            printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
 
         if (token.name == TK_EOF)
             break;
@@ -838,4 +879,5 @@ int main()
     total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
     printf("Total CPU time: %f\n", total_CPU_time);
     printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
+    printf("Symbol table entries (includes prepopulation 51) : %d \n", stable->token_count);
 }
