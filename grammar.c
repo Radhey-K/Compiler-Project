@@ -1,9 +1,14 @@
 #include "lexer.h"
 #define NUM_RULES 95
+#define NUM_TOKENS 61
+#define NUM_NON_TERMINALS 53
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
+
+
 
 typedef struct{
     union
@@ -26,6 +31,139 @@ typedef struct lhsnode{
     symbol sym;
     NODE** productionRule;
 }LHSNODE;
+
+typedef struct first{
+    int has_epsilon; // 1 if epsilon is in first set.
+    int is_filled; // 1 if first set is calculated already.
+    NODE* head;
+}FIRST;
+
+NODE rules[NUM_RULES];
+FIRST* FIRST_T[NUM_TOKENS];
+FIRST* FIRST_NT[NUM_NON_TERMINALS];
+
+void find_first_set(symbol sym){
+    if(sym.is_terminal==1){
+        if(FIRST_T[sym.t]->is_filled==1) return;
+    }else{
+        if(FIRST_NT[sym.nt]->is_filled==1) return;
+    }
+
+    FIRST* ptr = (FIRST*)malloc(sizeof(FIRST));
+    ptr->head=NULL;
+    //handling first of terminals.
+    if(sym.is_terminal==1){
+        ptr->head = (NODE*)malloc(sizeof(NODE));
+        ptr->head->sym = sym;
+        ptr->head->next = NULL;
+        ptr->is_filled=1;
+        if(sym.t == TK_EPS){
+            ptr->has_epsilon=1;
+        }
+        FIRST_T[sym.t] = ptr;
+        return;
+    }
+
+    NODE* temp;
+    for(int i=0; i<NUM_RULES; i++){
+        if(symEqual(rules[i].sym, sym)){
+            temp = rules[i].next;
+            while(temp!=NULL){
+                find_first_set(temp->sym);
+                FIRST* curr;
+                if(temp->sym.is_terminal==1){
+                    curr = FIRST_T[sym.t];
+                }else{
+                    curr = FIRST_NT[sym.nt];
+                }
+                merge_list(ptr, curr);
+                if(curr->has_epsilon==0)break;
+                temp = temp->next;
+            }
+        }
+    }
+    ptr->is_filled=1;
+    if(sym.is_terminal==1){
+        FIRST_T[sym.t] = ptr;
+    }else{
+        FIRST_NT[sym.nt] = ptr;
+    }
+}
+
+//adds First(f2) to First(f1)
+void merge_list(FIRST* f1, FIRST* f2){
+    NODE* temp = f1->head;
+    if(temp!=NULL){
+        while(temp->next!=NULL) temp = temp->next;
+    }
+
+    NODE* root = f2->head;
+    while(root != NULL){
+        temp->next = (NODE*)malloc(sizeof(NODE));
+        temp->next->sym = root->sym;
+        temp->next->next = NULL;
+        temp = temp->next;
+        root = root->next;
+    }
+
+    if(f2->has_epsilon == 1){
+        f1->has_epsilon = 1;
+    }
+}
+
+NODE* find_unique(NODE* root){
+    NODE* temp = root;
+    int token_cnt[NUM_TOKENS] = {0};
+    int non_terminal_cnt[NUM_NON_TERMINALS] = {0};
+    while(temp!=NULL){
+        if(temp->sym.is_terminal==1){
+            token_cnt[temp->sym.t]++;
+        }else{
+            non_terminal_cnt[temp->sym.nt]++;
+        }
+    }
+    NODE* head = NULL;
+    NODE* curr = head;
+    for(int i=0; i<NUM_TOKENS; i++){
+        if(token_cnt[i]>0){
+            curr = (NODE*)malloc(sizeof(NODE));
+            curr->sym.is_terminal=1;
+            curr->sym.t=i;
+            curr->next=NULL;
+            curr=curr->next;
+        }
+    }
+    for(int i=0; i<NUM_NON_TERMINALS; i++){
+        if(non_terminal_cnt[i]>0){
+            curr = (NODE*)malloc(sizeof(NODE));
+            curr->sym.is_terminal=0;
+            curr->sym.nt=i;
+            curr->next=NULL;
+            curr=curr->next;
+        }
+    }
+    return head;
+}
+
+void print_list(NODE* root){
+    if(root->sym.is_terminal == 1){
+        printf("%s ", tokenToString(root->sym.t));
+    }else{
+        printf("%s ", nonterminaltoString(root->sym.nt));
+    }
+    printf("\n");
+}
+
+
+int symEqual(symbol s1, symbol s2){
+    if(s1.is_terminal != s2.is_terminal)return 0;
+    if(s1.is_terminal){
+        if(s1.t==s2.t)return 1;
+    }else{
+        if(s1.nt==s2.nt)return 1;
+    }
+    return 0;
+}
 
 // LHSNODE rules[NUM_RULES];
 
@@ -406,7 +544,7 @@ int main(){
         return 1;
     }
 
-    NODE *rules = malloc(sizeof(NODE) * NUM_RULES);
+    // NODE *rules = malloc(sizeof(NODE) * NUM_RULES);
 
     char line[256];
     char lhs[256];
@@ -450,24 +588,49 @@ int main(){
         }
         i++;
     }
+
+    // computes first set for tokens
+    for(int i=0; i<NUM_TOKENS; i++){
+        symbol sym;
+        sym.is_terminal=1;
+        sym.t=i;
+        find_first_set(sym);
+    }
+
+    // computes first set for non terminals
+    for(int i=0; i<NUM_NON_TERMINALS; i++){
+        symbol sym;
+        sym.is_terminal=0;
+        sym.nt=i;
+        find_first_set(sym);
+        // find_unique(FIRST_NT[i]->head);
+    }
+
+    //printing follow sets
+    for(int i=0; i<NUM_NON_TERMINALS; i++){
+        print_list(FIRST_NT[i]->head);
+    }
+
+
     // printf("%d\n", rules[0].next->sym.nt);
     // printf("%d\n", rules[0].next->next->sym.nt);
     // printf("%d\n", rules[1].next->sym.nt);
     // printf("%d\n", rules[1].next->next->sym.nt);
     // printf("%d\n", rules[1].next->next->next->sym.nt);
-    for(int i = 0; i < NUM_RULES; i++) {
-        printf("%s ===>", nonterminaltoString(rules[i].sym.nt));
-        NODE* head = &rules[i];
-        while(head->next) {
-            if (head->next->sym.is_terminal) {
-                printf(" %s", tokenToString(head->next->sym.t));
-            } else {
-                printf(" %s", nonterminaltoString(head->next->sym.nt));
-            }
-            head = head->next;
-        }
-        printf("\n");
-    }
+
+    // for(int i = 0; i < NUM_RULES; i++) {
+    //     printf("%s ===>", nonterminaltoString(rules[i].sym.nt));
+    //     NODE* head = &rules[i];
+    //     while(head->next) {
+    //         if (head->next->sym.is_terminal) {
+    //             printf(" %s", tokenToString(head->next->sym.t));
+    //         } else {
+    //             printf(" %s", nonterminaltoString(head->next->sym.nt));
+    //         }
+    //         head = head->next;
+    //     }
+    //     printf("\n");
+    // }
 }
 
 
