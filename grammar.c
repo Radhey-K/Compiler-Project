@@ -81,6 +81,14 @@ void merge_list(FIRST* f1, FIRST* f2){
 }
 
 void find_first_set(symbol sym){
+
+    // if(sym.is_terminal == 1){
+    //     printf("%s ", tokenToString(sym.t));
+    // }else{
+    //     printf("%s ", nonterminaltoString(sym.nt));
+    // }
+    // printf("\n");
+
     if(sym.is_terminal==1){
         if(FIRST_T[sym.t]!=NULL && FIRST_T[sym.t]->is_filled==1) return;
     }else{
@@ -92,27 +100,31 @@ void find_first_set(symbol sym){
     //handling first of terminals.
     if(sym.is_terminal==1){
         ptr->head = (NODE*)malloc(sizeof(NODE));
-        ptr->head->sym = sym;
+        // ptr->head->sym = sym;
+        ptr->head->sym.t = sym.t;
+        ptr->head->sym.is_terminal=1;
         ptr->head->next = NULL;
         ptr->is_filled=1;
         if(sym.t == TK_EPS){
             ptr->has_epsilon=1;
+        }else{
+            ptr->has_epsilon=0;
         }
         FIRST_T[sym.t] = ptr;
         return;
     }
 
-    NODE* temp;
     for(int i=0; i<NUM_RULES; i++){
         if(symEqual(rules[i].sym, sym)){
+            NODE* temp;
             temp = rules[i].next;
             while(temp!=NULL){
                 find_first_set(temp->sym);
                 FIRST* curr;
                 if(temp->sym.is_terminal==1){
-                    curr = FIRST_T[sym.t];
+                    curr = FIRST_T[temp->sym.t];
                 }else{
-                    curr = FIRST_NT[sym.nt];
+                    curr = FIRST_NT[temp->sym.nt];
                 }
                 merge_list(ptr, curr);
                 if(curr->has_epsilon==0)break;
@@ -120,6 +132,7 @@ void find_first_set(symbol sym){
             }
         }
     }
+
     ptr->is_filled=1;
     if(sym.is_terminal==1){
         FIRST_T[sym.t] = ptr;
@@ -623,6 +636,13 @@ int main(){
         sym.nt=i;
         find_first_set(sym);
         // find_unique(FIRST_NT[i]->head);
+
+        // if(sym.is_terminal == 1){
+        //     printf("%s ", tokenToString(sym.t));
+        // }else{
+        //     printf("%s ", nonterminaltoString(sym.nt));
+        // }
+        // printf("\n");
     }
 
     //printing follow sets
