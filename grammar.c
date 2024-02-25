@@ -42,11 +42,49 @@ NODE rules[NUM_RULES];
 FIRST* FIRST_T[NUM_TOKENS];
 FIRST* FIRST_NT[NUM_NON_TERMINALS];
 
+int symEqual(symbol s1, symbol s2){
+    if(s1.is_terminal != s2.is_terminal)return 0;
+    if(s1.is_terminal){
+        if(s1.t==s2.t)return 1;
+    }else{
+        if(s1.nt==s2.nt)return 1;
+    }
+    return 0;
+}
+
+//adds First(f2) to First(f1)
+void merge_list(FIRST* f1, FIRST* f2){
+    NODE* temp = f1->head;
+    NODE* root = f2->head;
+    if(temp!=NULL){
+        while(temp->next!=NULL) temp = temp->next;
+    }else{
+        if(root==NULL)return;
+        f1->head = (NODE*)malloc(sizeof(NODE));
+        f1->head->sym = root->sym;
+        f1->head->next = NULL;
+        temp = f1->head;
+        root = root->next;
+    }
+
+    while(root != NULL){
+        temp->next = (NODE*)malloc(sizeof(NODE));
+        temp->next->sym = root->sym;
+        temp->next->next = NULL;
+        temp = temp->next;
+        root = root->next;
+    }
+
+    if(f2->has_epsilon == 1){
+        f1->has_epsilon = 1;
+    }
+}
+
 void find_first_set(symbol sym){
     if(sym.is_terminal==1){
-        if(FIRST_T[sym.t]->is_filled==1) return;
+        if(FIRST_T[sym.t]!=NULL && FIRST_T[sym.t]->is_filled==1) return;
     }else{
-        if(FIRST_NT[sym.nt]->is_filled==1) return;
+        if(FIRST_NT[sym.nt]!=NULL && FIRST_NT[sym.nt]->is_filled==1) return;
     }
 
     FIRST* ptr = (FIRST*)malloc(sizeof(FIRST));
@@ -90,59 +128,48 @@ void find_first_set(symbol sym){
     }
 }
 
-//adds First(f2) to First(f1)
-void merge_list(FIRST* f1, FIRST* f2){
-    NODE* temp = f1->head;
-    if(temp!=NULL){
-        while(temp->next!=NULL) temp = temp->next;
-    }
 
-    NODE* root = f2->head;
-    while(root != NULL){
-        temp->next = (NODE*)malloc(sizeof(NODE));
-        temp->next->sym = root->sym;
-        temp->next->next = NULL;
-        temp = temp->next;
-        root = root->next;
-    }
-
-    if(f2->has_epsilon == 1){
-        f1->has_epsilon = 1;
-    }
-}
 
 NODE* find_unique(NODE* root){
     NODE* temp = root;
-    int token_cnt[NUM_TOKENS] = {0};
-    int non_terminal_cnt[NUM_NON_TERMINALS] = {0};
+    if(temp==NULL)return NULL;
+    int token_cnt[NUM_TOKENS];
+    for(int i=0; i<NUM_TOKENS; i++){
+        token_cnt[i]=0;
+    }
+    int non_terminal_cnt[NUM_NON_TERMINALS];
+    for(int i=0; i<NUM_NON_TERMINALS; i++){
+        non_terminal_cnt[i]=0;
+    }
     while(temp!=NULL){
         if(temp->sym.is_terminal==1){
             token_cnt[temp->sym.t]++;
         }else{
             non_terminal_cnt[temp->sym.nt]++;
         }
+        temp = temp->next;
     }
-    NODE* head = NULL;
+    NODE* head = (NODE*)malloc(sizeof(NODE));
     NODE* curr = head;
     for(int i=0; i<NUM_TOKENS; i++){
         if(token_cnt[i]>0){
-            curr = (NODE*)malloc(sizeof(NODE));
-            curr->sym.is_terminal=1;
-            curr->sym.t=i;
-            curr->next=NULL;
+            curr->next = (NODE*)malloc(sizeof(NODE));
+            curr->next->sym.is_terminal=1;
+            curr->next->sym.t=i;
+            curr->next->next=NULL;
             curr=curr->next;
         }
     }
     for(int i=0; i<NUM_NON_TERMINALS; i++){
         if(non_terminal_cnt[i]>0){
-            curr = (NODE*)malloc(sizeof(NODE));
-            curr->sym.is_terminal=0;
-            curr->sym.nt=i;
-            curr->next=NULL;
+            curr->next = (NODE*)malloc(sizeof(NODE));
+            curr->next->sym.is_terminal=0;
+            curr->next->sym.nt=i;
+            curr->next->next=NULL;
             curr=curr->next;
         }
     }
-    return head;
+    return head->next;
 }
 
 void print_list(NODE* root){
@@ -155,15 +182,7 @@ void print_list(NODE* root){
 }
 
 
-int symEqual(symbol s1, symbol s2){
-    if(s1.is_terminal != s2.is_terminal)return 0;
-    if(s1.is_terminal){
-        if(s1.t==s2.t)return 1;
-    }else{
-        if(s1.nt==s2.nt)return 1;
-    }
-    return 0;
-}
+
 
 // LHSNODE rules[NUM_RULES];
 
