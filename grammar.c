@@ -53,13 +53,17 @@ int symEqual(symbol s1, symbol s2){
 }
 
 //adds First(f2) to First(f1)
-void merge_list(FIRST* f1, FIRST* f2){
+void merge_list(FIRST* f1, FIRST* f2, int flag){
     NODE* temp = f1->head;
     NODE* root = f2->head;
     if(temp!=NULL){
         while(temp->next!=NULL) temp = temp->next;
     }else{
         if(root==NULL)return;
+        if (root->sym.is_terminal == 1 && root->sym.t == TK_EPS && flag == 0){
+            root = root->next;
+        }
+        if (root == NULL) return;
         f1->head = (NODE*)malloc(sizeof(NODE));
         f1->head->sym = root->sym;
         f1->head->next = NULL;
@@ -68,6 +72,10 @@ void merge_list(FIRST* f1, FIRST* f2){
     }
 
     while(root != NULL){
+        if (root->sym.is_terminal == 1 && root->sym.t == TK_EPS && flag == 0){
+            root = root->next;
+        }
+        if (root == NULL) return;
         temp->next = (NODE*)malloc(sizeof(NODE));
         temp->next->sym = root->sym;
         temp->next->next = NULL;
@@ -75,9 +83,9 @@ void merge_list(FIRST* f1, FIRST* f2){
         root = root->next;
     }
 
-    if(f2->has_epsilon == 1){
-        f1->has_epsilon = 1;
-    }
+    // if(f2->has_epsilon == 1){
+    //     f1->has_epsilon = 1;
+    // }
 }
 
 void find_first_set(symbol sym){
@@ -87,7 +95,7 @@ void find_first_set(symbol sym){
     // }else{
     //     printf("%s ", nonterminaltoString(sym.nt));
     // }
-    // printf("\n");
+    // // printf("\n");
 
     if(sym.is_terminal==1){
         if(FIRST_T[sym.t]!=NULL && FIRST_T[sym.t]->is_filled==1) return;
@@ -126,9 +134,13 @@ void find_first_set(symbol sym){
                 }else{
                     curr = FIRST_NT[temp->sym.nt];
                 }
-                merge_list(ptr, curr);
+                merge_list(ptr, curr, 0);
                 if(curr->has_epsilon==0)break;
                 temp = temp->next;
+            }
+            if (temp == NULL){
+                ptr->has_epsilon = 1;
+                merge_list(ptr, FIRST_T[TK_EPS], 1);
             }
         }
     }
@@ -143,7 +155,7 @@ void find_first_set(symbol sym){
 
 
 
-NODE* find_unique(NODE* root){
+NODE* find_unique(NODE* root){ // use in follow set generation, not needed in first generation
     NODE* temp = root;
     if(temp==NULL)return NULL;
     int token_cnt[NUM_TOKENS];
@@ -186,10 +198,13 @@ NODE* find_unique(NODE* root){
 }
 
 void print_list(NODE* root){
-    if(root->sym.is_terminal == 1){
-        printf("%s ", tokenToString(root->sym.t));
-    }else{
-        printf("%s ", nonterminaltoString(root->sym.nt));
+    while(root != NULL) {
+        if(root->sym.is_terminal == 1){
+            printf("%s ", tokenToString(root->sym.t));
+        }else{
+            printf("%s ", nonterminaltoString(root->sym.nt));
+        }
+        root = root->next;
     }
     printf("\n");
 }
@@ -643,12 +658,18 @@ int main(){
         //     printf("%s ", nonterminaltoString(sym.nt));
         // }
         // printf("\n");
+
+    }
+    for(int i=0; i<NUM_TOKENS; i++){
+        print_list(FIRST_T[i]->head);
     }
 
     //printing follow sets
     for(int i=0; i<NUM_NON_TERMINALS; i++){
+        printf("%s ===> ", nonterminaltoString(i));
         print_list(FIRST_NT[i]->head);
     }
+
 
 
     // printf("%d\n", rules[0].next->sym.nt);
