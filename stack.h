@@ -24,9 +24,9 @@ struct StackNode
 
 // Function prototypes
 struct StackNode *createNode(symbol data);
-int isEmpty(struct StackNode *root);
-void push(struct StackNode **root, symbol data);
-symbol pop(struct StackNode **root);
-symbol top(struct StackNode *root);
+int isEmpty(struct StackNode *stack);
+void push(struct StackNode **stack, symbol data);
+symbol pop(struct StackNode **stack);
+symbol top(struct StackNode *stack);
 
 #endif
