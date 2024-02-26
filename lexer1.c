@@ -557,6 +557,7 @@ TOKEN tokenizer(ST stable)
             break;
 
         case 24:
+            retract(1);
             token.name = TK_RUID;
             strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
@@ -566,6 +567,7 @@ TOKEN tokenizer(ST stable)
             if (ele == NULL) {
                 table_insert(stable, token.string, token.name);
             }
+            // printf("\n%c\n",buffer[forwardPtr+2]);
             return token;
             break;
 
