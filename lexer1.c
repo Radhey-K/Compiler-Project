@@ -10,6 +10,8 @@
 
 #define BUFFER_SIZE 1000
 
+
+
 // State for dfa
 int state = 0;
 
@@ -204,6 +206,7 @@ char getCharacter()
 
     if (buffer[forwardPtr] == '\0')
     {
+        forwardPtr++;
         return EOF;
     }
 
@@ -279,7 +282,7 @@ TOKEN tokenizer(ST stable)
     TOKEN token;
     token.integer = -1;
     token.realNum = -1;
-    token.string = malloc(sizeof(char) * 20);
+    token.string = (char*)malloc(sizeof(char) * 20);
     ST_ELEMENT ele; // for lookup
     // Need to initialize the lexemeBegin and forwardPtrs too
     while (true)
@@ -289,70 +292,72 @@ TOKEN tokenizer(ST stable)
         switch(state){
             case 0:
                 character=getCharacter();
+                // printf("%d\n",forwardPtr); 
                 if(0){}
-            else if(character==' ') state=58;
-            else if(isDigit(character))
-                state = 1;
-            else if(character=='b' || character=='c' || character=='d')
-                state = 12;
-            else if(isLowercase(character)&&character!='b' && character!='c' && character!='d')
-                state = 16;
-            else if(character == '<')
-                state = 25;
-            else if(character == '=')
-                state = 32;
-            else if(character == '>')
-                state = 34;
-            else if(character == '!')
-                state = 37;
-            else if(character == '@')
-                state = 39;
-            else if(character == '&')
-                state = 42;
-            else if (character == '_')
-                state = 18;
-            else if (character == '#')
-                state = 22;
-            else if (character == '[')
-                state = 45;
-            else if (character == ']')
-                state = 46;
-            else if (character == ',')
-                state = 47;
-            else if (character == ';')
-                state = 48;
-            else if (character == ':')
-                state = 49;
-            else if (character == '.')
-                state = 50;
-            else if (character == '(')
-                state = 51;
-            else if (character == ')')
-                state = 52;
-            else if (character == '+')
-                state = 53;
-            else if (character == '-')
-                state = 54;
-            else if (character == '*')
-                state = 55;
-            else if (character == '/')
-                state = 56;
-            else if (character == '~')
-                state = 57;
-            else if (character == '%')
-                state = 61;
+                else if(character==' ') state=58;
+                else if(isDigit(character))
+                    state = 1;
+                else if(character=='b' || character=='c' || character=='d')
+                    state = 12;
+                else if(isLowercase(character)&&character!='b' && character!='c' && character!='d')
+                    state = 16;
+                else if(character == '<')
+                    state = 25;
+                else if(character == '=')
+                    state = 32;
+                else if(character == '>')
+                    state = 34;
+                else if(character == '!')
+                    state = 37;
+                else if(character == '@')
+                    state = 39;
+                else if(character == '&')
+                    state = 42;
+                else if (character == '_')
+                    state = 18;
+                else if (character == '#')
+                    state = 22;
+                else if (character == '[')
+                    state = 45;
+                else if (character == ']')
+                    state = 46;
+                else if (character == ',')
+                    state = 47;
+                else if (character == ';')
+                    state = 48;
+                else if (character == ':')
+                    state = 49;
+                else if (character == '.')
+                    state = 50;
+                else if (character == '(')
+                    state = 51;
+                else if (character == ')')
+                    state = 52;
+                else if (character == '+')
+                    state = 53;
+                else if (character == '-')
+                    state = 54;
+                else if (character == '*')
+                    state = 55;
+                else if (character == '/')
+                    state = 56;
+                else if (character == '~')
+                    state = 57;
+                else if (character == '%')
+                    state = 61;
 
-            else if (character == '\n')
-                state = 62;
-            else if (character == EOF)
-            {
-                token.name = TK_EOF;
-                return token;
-            }
+                else if (character == '\n')
+                    state = 62;
+                else if (character == EOF)
+                {
+                    token.name = TK_EOF;
+                    return token;
+                }
 
-            break;
+                break;
         
         case 1: character = getCharacter();
+                // printf("%d\n",forwardPtr); 
                 if(character == '.') state = 2;
                 else if(isDigit(character)) state = 1;
                 else state = 9;
@@ -399,7 +404,8 @@ TOKEN tokenizer(ST stable)
                 break;
 
         case 9: //TK_NUM    
-                retract(1); 
+                retract(1);
+                // printf("%d\n",forwardPtr);  
                 token.name = TK_NUM;
                 strcpy(token.string, tokenFromPtrs());
                 token.integer = atoi(token.string);
@@ -693,6 +699,7 @@ TOKEN tokenizer(ST stable)
                 state = 40;
             else
                 state = 60;
+            break;
 
         case 40:
             character = getCharacter();
@@ -700,6 +707,7 @@ TOKEN tokenizer(ST stable)
                 state = 41;
             else
                 state = 60;
+            break;
 
         case 41:
             token.name = TK_OR;
