@@ -1,12 +1,173 @@
-#include "lexer.h"
+// #include "lexer.h"
 #define NUM_RULES 95
 #define NUM_TOKENS 61
 #define NUM_NON_TERMINALS 53
+#define MAX_FOLLOW_SET_SIZE 100
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+// #include "symbol_table.h"
 
+// REMOVE LATER-START
+#define TABLE_SIZE 197
+#define LEXEME_MAX_CHARS 30
+
+typedef enum {
+    TK_UNKNOWN, // For symbol table entry init
+    TK_ASSIGNOP,
+    TK_COMMENT,
+    TK_FIELDID,
+    TK_ID,
+    TK_NUM,
+    TK_RNUM,
+    TK_FUNID,
+    TK_RUID,
+    TK_WITH,
+    TK_PARAMETERS,
+    TK_END,
+    TK_WHILE,
+    TK_UNION,
+    TK_ENDUNION,
+    TK_DEFINETYPE,
+    TK_AS,
+    TK_TYPE,
+    TK_MAIN,
+    TK_GLOBAL,
+    TK_PARAMETER,
+    TK_LIST,
+    TK_SQL,
+    TK_SQR,
+    TK_INPUT,
+    TK_OUTPUT,
+    TK_INT,
+    TK_REAL,
+    TK_COMMA,
+    TK_SEM,
+    TK_COLON,
+    TK_DOT,
+    TK_ENDWHILE,
+    TK_OP,
+    TK_CL,
+    TK_IF,
+    TK_THEN,
+    TK_ENDIF,
+    TK_READ,
+    TK_WRITE,
+    TK_RETURN,
+    TK_PLUS,
+    TK_MINUS,
+    TK_MUL,
+    TK_DIV,
+    TK_CALL,
+    TK_RECORD,
+    TK_ENDRECORD,
+    TK_ELSE,
+    TK_AND,
+    TK_OR,
+    TK_NOT,
+    TK_LT,
+    TK_LE,
+    TK_EQ,
+    TK_GT,
+    TK_GE,
+    TK_NE,
+    TK_EOF, // To detect that file has terminated
+    TK_EPS,
+    TK_ERROR,
+    TK_DOLLAR
+} tokName;
+
+typedef enum
+{
+    program,
+    otherFunctions,
+    mainFunction,
+    stmts,
+    function,
+    input_par,
+    output_par,
+    parameter_list,
+    dataType,
+    primitiveDatatype,
+    constructedDatatype,
+    remaining_list,
+    typeDefinitions,
+    actualOrRedefined,
+    typeDefinition,
+    fieldDefinitions,
+    fieldDefinition,
+    fieldType,
+    moreFields,
+    declarations,
+    declaration,
+    global_or_not,
+    otherStmts,
+    stmt,
+    assignmentStmt,
+    SingleOrRecId,
+    option_single_constructed,
+    oneExpansion,
+    moreExpansions,
+    funCallStmt,
+    outputParameters,
+    inputParameters,
+    iterativeStmt,
+    conditionalStmt,
+    elsePart,
+    ioStmt,
+    arithmeticExpression,
+    expPrime,
+    term,
+    termPrime,
+    factor,
+    highPrecedenceOperator,
+    lowPrecedenceOperators,
+    booleanExpression,
+    var,
+    logicalOp,
+    relationalOp,
+    returnStmt,
+    optionalReturn,
+    idList,
+    more_ids,
+    definetypestmt,
+    A
+} nonterminal;
+
+typedef struct token {
+    tokName name; //should be an enum
+    int lineNo;
+    char* string;
+    int integer;
+    float realNum;
+
+} TOKEN;
+
+const char* nonterminaltoString(nonterminal nt);
+const char* tokenToString(tokName token);
+
+const char* tokenToString(tokName token);
+const char* nonterminaltoString(nonterminal nt);
+
+typedef struct st_element * ST_ELEMENT;
+typedef struct symbol_table st;
+typedef struct symbol_table * ST;
+
+// TABLE STRUCTS
+struct st_element {
+	char lexeme[LEXEME_MAX_CHARS];
+	tokName tk_type;
+    ST_ELEMENT next;
+};
+
+struct symbol_table {
+    struct st_element table[TABLE_SIZE];
+    int token_count;
+};
+
+
+// REMOVE LATER-END
 
 
 
@@ -54,8 +215,9 @@ int symEqual(symbol s1, symbol s2){
 
 //adds First(f2) to First(f1)
 void merge_list(FIRST* f1, FIRST* f2, int flag){
-    NODE* temp = f1->head;
-    NODE* root = f2->head;
+    NODE* temp=f1->head;
+    NODE* root=f2->head;
+
     if(temp!=NULL){
         while(temp->next!=NULL) temp = temp->next;
     }else{
@@ -209,10 +371,102 @@ void print_list(NODE* root){
     printf("\n");
 }
 
+// typedef struct follow{
+//     NODE* head;
+//     int is_filled;
+    // int is_epsilon;
+// }FOLLOW;
+
+// We dont need a different struct for follow as first has the same fields as follow. isEpsilon will always be 0
+FIRST* FOLLOW_NT[NUM_NON_TERMINALS];
+FIRST* FOLLOW_T[NUM_TOKENS];
 
 
+void findFollow(symbol sym){
+    printf("1\n");
 
-// LHSNODE rules[NUM_RULES];
+    if(sym.is_terminal==0 && sym.nt==program){
+        FOLLOW_NT[program]=(FIRST*)malloc(sizeof(FIRST));
+        symbol s;
+        s.is_terminal=0;
+        s.t=TK_DOLLAR;
+        FOLLOW_NT[program]->head=(NODE*)malloc(sizeof(NODE));
+        FOLLOW_NT[program]->head->sym=s;
+        FOLLOW_NT[program]->head->next=NULL;
+        FOLLOW_NT[program]->is_filled=1;
+        FOLLOW_NT[program]->has_epsilon=0;
+        return;
+    }
+
+    if(FOLLOW_NT[sym.nt]!=NULL && FOLLOW_NT[sym.nt]->is_filled==1) return;
+
+
+    FIRST* ptr = (FIRST*)malloc(sizeof(FIRST));
+    ptr->head=NULL;
+
+    if(sym.is_terminal==1){
+        FOLLOW_T[sym.t]=(FIRST*)malloc(sizeof(FIRST));
+        symbol s;
+        s.is_terminal=1;
+        s.t=sym.t;
+        FOLLOW_T[sym.t]->head->sym=s;
+        FOLLOW_T[sym.t]->head->next=NULL;
+        FOLLOW_T[sym.t]->is_filled=1;
+        FOLLOW_T[sym.t]->has_epsilon=0;
+        return;
+    }
+    
+
+    for(int i=0; i<NUM_RULES; i++){
+        if(rules[i].sym.nt==sym.nt){
+            NODE* temp=rules[i].next;
+            while(temp!=NULL){
+                if(temp->next==NULL){
+                    merge_list(ptr,FIRST_NT[temp->sym.nt],0);
+                    // if(FIRST_NT[temp->sym.nt]->has_epsilon==1){
+                    //     merge_list(ptr,FOLLOW_NT[rules[i].sym.nt],0);
+                    // }
+                    break;
+                }
+                temp=temp->next;
+            }
+        }
+
+        else{
+            
+            NODE* temp=rules[i].next;
+            while(temp!=NULL){
+                if(temp->sym.is_terminal==0 && temp->sym.nt==sym.nt){
+                    if(temp->next==NULL){
+                        findFollow(rules[i].sym);
+                        merge_list(ptr,FOLLOW_NT[rules[i].sym.nt],0);
+                    }
+                    else{
+                        
+                        printf("%s\n",nonterminaltoString(temp->next->sym.nt));
+                        print_list(FIRST_NT[2]->head);
+                        if(temp->next->sym.is_terminal==0){
+                            // printf("2\n");
+                            // printf("%d\n",temp->next->sym.nt);
+                            // if(FIRST_NT[temp->next->sym.nt]->head==NULL)printf("its null\n");
+                            merge_list(ptr,FIRST_NT[temp->next->sym.nt],0);
+                        }
+                        
+                        else merge_list(ptr,FIRST_T[temp->next->sym.t],0);
+                        
+                        // The below commented part has not been added yet
+                        // while the next token has epsilon in its first set, add the first of the next to next token to the follow set of the current token
+                    }
+                }
+                temp=temp->next;
+            }
+        }
+    }
+
+    ptr->is_filled=1;
+    find_unique(ptr->head);
+}
+
 
 int getTerminal(const char* token) {
     if (strcmp(token, "TK_UNKNOWN") == 0) {
@@ -403,6 +657,7 @@ int getTerminal(const char* token) {
     }
 }
 
+
 int getNonTerminal(char* token) {
     if (strcmp(token, "<program>") == 0) {
         return program;
@@ -569,20 +824,6 @@ int getNonTerminal(char* token) {
 }
 
 int main(){
-    // rules[E].numProductions=1;
-    // rules[E].sym.nt=E;
-    // rules[E].sym.is_terminal=0;
-    // rules[E].productionRule=malloc(sizeof(RHSNODE*)*rules[E].numProductions);
-
-    // rules[E].productionRule[0]=malloc(sizeof(RHSNODE));
-    // rules[E].productionRule[0]->sym.nt=T;
-    // rules[E].productionRule[0]->sym.is_terminal=0;
-
-    // rules[E].productionRule[0]->next=malloc(sizeof(RHSNODE));
-    // rules[E].productionRule[0]->next->sym.nt=E1;
-    // rules[E].productionRule[0]->next->sym.is_terminal=0;
-
-    // rules[E].productionRule[0]->next->next=NULL;
 
     FILE *fp = fopen("test_grammar.txt", "r");
     if (fp == NULL)
@@ -660,16 +901,29 @@ int main(){
         // printf("\n");
 
     }
-    for(int i=0; i<NUM_TOKENS; i++){
-        print_list(FIRST_T[i]->head);
-    }
+    // for(int i=0; i<NUM_TOKENS; i++){
+    //     print_list(FIRST_T[i]->head);
+    // }
+    // for(int i=0; i<NUM_NON_TERMINALS; i++){
+    //     print_list(FIRST_NT[i]->head);
+    // }
 
-    //printing follow sets
-    for(int i=0; i<NUM_NON_TERMINALS; i++){
-        printf("%s ===> ", nonterminaltoString(i));
-        print_list(FIRST_NT[i]->head);
-    }
+    symbol sym;
+    sym.is_terminal=0;
+    sym.nt=otherFunctions;
+    findFollow(sym);
+    print_list(FOLLOW_NT[sym.nt]->head);
 
+    // for(int i=0; i<NUM_NON_TERMINALS; i++){
+    //     symbol sym;
+    //     sym.is_terminal=0;
+    //     sym.nt=i;
+    //     findFollow(sym);
+    // }
+
+    // for(int i=0; i<NUM_NON_TERMINALS; i++){
+    //     print_list(FOLLOW_NT[i]->head);
+    // }
 
 
     // printf("%d\n", rules[0].next->sym.nt);
@@ -692,6 +946,137 @@ int main(){
     //     printf("\n");
     // }
 }
+
+
+
+const char* tokenToString(tokName token) {
+    switch(token) {
+        case TK_ASSIGNOP: return "TK_ASSIGNOP";
+        case TK_COMMENT: return "TK_COMMENT";
+        case TK_FIELDID: return "TK_FIELDID";
+        case TK_ID: return "TK_ID";
+        case TK_NUM: return "TK_NUM";
+        case TK_RNUM: return "TK_RNUM";
+        case TK_FUNID: return "TK_FUNID";
+        case TK_RUID: return "TK_RUID";
+        case TK_WITH: return "TK_WITH";
+        case TK_PARAMETERS: return "TK_PARAMETERS";
+        case TK_END: return "TK_END";
+        case TK_WHILE: return "TK_WHILE";
+        case TK_UNION: return "TK_UNION";
+        case TK_ENDUNION: return "TK_ENDUNION";
+        case TK_DEFINETYPE: return "TK_DEFINETYPE";
+        case TK_AS: return "TK_AS";
+        case TK_TYPE: return "TK_TYPE";
+        case TK_MAIN: return "TK_MAIN";
+        case TK_GLOBAL: return "TK_GLOBAL";
+        case TK_PARAMETER: return "TK_PARAMETER";
+        case TK_LIST: return "TK_LIST";
+        case TK_SQL: return "TK_SQL";
+        case TK_SQR: return "TK_SQR";
+        case TK_INPUT: return "TK_INPUT";
+        case TK_OUTPUT: return "TK_OUTPUT";
+        case TK_INT: return "TK_INT";
+        case TK_REAL: return "TK_REAL";
+        case TK_COMMA: return "TK_COMMA";
+        case TK_SEM: return "TK_SEM";
+        case TK_COLON: return "TK_COLON";
+        case TK_DOT: return "TK_DOT";
+        case TK_ENDWHILE: return "TK_ENDWHILE";
+        case TK_OP: return "TK_OP";
+        case TK_CL: return "TK_CL";
+        case TK_IF: return "TK_IF";
+        case TK_THEN: return "TK_THEN";
+        case TK_ENDIF: return "TK_ENDIF";
+        case TK_READ: return "TK_READ";
+        case TK_WRITE: return "TK_WRITE";
+        case TK_RETURN: return "TK_RETURN";
+        case TK_PLUS: return "TK_PLUS";
+        case TK_MINUS: return "TK_MINUS";
+        case TK_MUL: return "TK_MUL";
+        case TK_DIV: return "TK_DIV";
+        case TK_CALL: return "TK_CALL";
+        case TK_RECORD: return "TK_RECORD";
+        case TK_ENDRECORD: return "TK_ENDRECORD";
+        case TK_ELSE: return "TK_ELSE";
+        case TK_AND: return "TK_AND";
+        case TK_OR: return "TK_OR";
+        case TK_NOT: return "TK_NOT";
+        case TK_LT: return "TK_LT";
+        case TK_LE: return "TK_LE";
+        case TK_EQ: return "TK_EQ";
+        case TK_GT: return "TK_GT";
+        case TK_GE: return "TK_GE";
+        case TK_NE: return "TK_NE";
+        case TK_EOF: return "TK_EOF";
+        case TK_ERROR: return "TK_ERROR";
+        case TK_EPS: return "TK_EPS";
+        case TK_DOLLAR: return "TK_DOLLAR";
+
+        default: return "Unknown Token";
+    }
+}
+
+const char* nonterminaltoString(nonterminal nt) {
+    switch(nt) {
+        case program: return "<program>";
+        case otherFunctions: return "<otherFunctions>";
+        case mainFunction: return "<mainFunction>";
+        case stmts: return "<stmts>";
+        case function: return "<function>";
+        case input_par: return "<input_par>";
+        case output_par: return "<output_par>";
+        case parameter_list: return "<parameter_list>";
+        case dataType: return "<dataType>";
+        case primitiveDatatype: return "<primitiveDatatype>";
+        case constructedDatatype: return "<constructedDatatype>";
+        case remaining_list: return "<remaining_list>";
+        case typeDefinitions: return "<typeDefinitions>";
+        case actualOrRedefined: return "<actualOrRedefined>";
+        case typeDefinition: return "<typeDefinition>";
+        case fieldDefinitions: return "<fieldDefinitions>";
+        case fieldDefinition: return "<fieldDefinition>";
+        case fieldType: return "<fieldType>";
+        case moreFields: return "<moreFields>";
+        case declarations: return "<declarations>";
+        case declaration: return "<declaration>";
+        case global_or_not: return "<global_or_not>";
+        case otherStmts: return "<otherStmts>";
+        case stmt: return "<stmt>";
+        case assignmentStmt: return "<assignmentStmt>";
+        case SingleOrRecId: return "<SingleOrRecId>";
+        case option_single_constructed: return "<option_single_constructed>";
+        case oneExpansion: return "<oneExpansion>";
+        case moreExpansions: return "<moreExpansions>";
+        case funCallStmt: return "<funCallStmt>";
+        case outputParameters: return "<outputParameters>";
+        case inputParameters: return "<inputParameters>";
+        case iterativeStmt: return "<iterativeStmt>";
+        case conditionalStmt: return "<conditionalStmt>";
+        case elsePart: return "<elsePart>";
+        case ioStmt: return "<ioStmt>";
+        case arithmeticExpression: return "<arithmeticExpression>";
+        case expPrime: return "<expPrime>";
+        case term: return "<term>";
+        case termPrime: return "<termPrime>";
+        case factor: return "<factor>";
+        case highPrecedenceOperator: return "<highPrecedenceOperator>";
+        case lowPrecedenceOperators: return "<lowPrecedenceOperators>";
+        case booleanExpression: return "<booleanExpression>";
+        case var: return "<var>";
+        case logicalOp: return "<logicalOp>";
+        case relationalOp: return "<relationalOp>";
+        case returnStmt: return "<returnStmt>";
+        case optionalReturn: return "<optionalReturn>";
+        case idList: return "<idList>";
+        case more_ids: return "<more_ids>";
+        case definetypestmt: return "<definetypestmt>";
+        case A: return "<A>";
+        case TK_DOLLAR : return "TK_DOLLAR";
+        default: return "Unknown";
+    }
+}
+
 
 
 

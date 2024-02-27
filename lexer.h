@@ -68,7 +68,8 @@ typedef enum {
     TK_NE,
     TK_EOF, // To detect that file has terminated
     TK_EPS,
-    TK_ERROR
+    TK_ERROR,
+    TK_DOLLAR
 } tokName;
 
 typedef enum
