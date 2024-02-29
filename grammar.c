@@ -1293,6 +1293,75 @@ const char* nonterminaltoString(nonterminal nt) {
     }
 }
 
+// Predictive Parse Table Functions -- Add NULL error checks
+NODE** create_predictive_table(){
+    NODE ** predictive_table = (NODE **) malloc(NUM_NON_TERMINALS * sizeof(NODE *));
+    // Not initalizing pointers to structs (will be NULL if not required in final table)
+    return predictive_table;
+}
 
+// (Pass rules + i)
+void parse_grammar_rule_for_table(NODE* rule_head, NODE** predictive_table) {
+    nonterminal rule_lhs = rule_head->sym.nt; // first node in rule is always the LHS NT
+    NODE * rhs_cur = rule_head->next;
+    if(rhs_cur->sym.is_terminal) {
+        FIRST* cur_first = FIRST_T[rhs_cur->sym.t];
+        push_rule_to_table(rule_head, cur_first, predictive_table);
+        return;
+    }else{
+        FIRST * cur_first = FIRST_NT[rhs_cur->sym.nt];
+        if(cur_first->has_epsilon){
+            push_rule_to_table(rule_head, cur_first, predictive_table);
+            rhs_cur = rhs_cur->next;
+            // cur_first->has_epsilon means the previous term in RHS has epsilon
+            // rhs_cur is the termainl after that
+            while(rhs_cur != NULL && cur_first->has_epsilon){
+                if(rhs_cur->sym.is_terminal){
+                    cur_first = FIRST_T[rhs_cur->sym.t];
+                    // If we hit an terminal on RHS no need to look further
+                    push_rule_to_table(rule_head, cur_first, predictive_table);
+                    return;
+                }else{
+                    cur_first = FIRST_NT[rhs_cur->sym.nt];
+                    push_rule_to_table(rule_head, cur_first, predictive_table);
+                    rhs_cur = rhs_cur->next;
+                }
+            }
+
+            // Checking if the last term in RHS also contained epsilon in first set --> add rule to follow of original NT
+            if (rhs_cur == NULL && cur_first->has_epsilon){
+                // Ending RHS term must be a NT in this case
+                cur_first = FOLLOW_NT[rule_head->sym.nt];
+                push_rule_to_table(rule_head, cur_first, predictive_table);
+            }
+        }else {
+            // if it doesnt contain e then we have found terminals at which to put the rule
+            push_rule_to_table(rule_head, cur_first, predictive_table);
+        }
+    }
+}
+
+// Our table has one extra column corresponding to EPS token --> never write to eps even if first set contains eps --> should be error always
+void push_rule_to_table(NODE* rule_head, FIRST* first_tokens, NODE** predictive_table){
+    nonterminal rule_lhs = rule_head->sym.nt;
+    NODE * table_terminal_tokens = first_tokens->head;
+    while(table_terminal_tokens != NULL){
+        if(table_terminal_tokens->sym.t != TK_EPS){
+            if(predictive_table[rule_lhs] == NULL){
+                *(predictive_table + rule_lhs) = (NODE *) malloc(NUM_TOKENS * sizeof(NODE));
+            }
+            predictive_table[rule_lhs][table_terminal_tokens->sym.t] = *(rule_head->next); // Just pushing RHS of the grammar rule
+        }
+    }
+    // All predictive_table[NT][T] which should raise errors are NULL (unitialized pointers)
+}
+
+NODE** generate_predictive_table(NODE * grammar_rules){
+    NODE ** predictive_table = create_predictive_table(); // Unpopulated
+    for(int i = 0; i < NUM_RULES; i++){
+        parse_grammar_rule_for_table((grammar_rules+i), predictive_table);
+    }
+    return predictive_table;
+}
 
 
