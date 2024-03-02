@@ -1879,7 +1879,7 @@ int getNonTerminal(char* token) {
 
 // Push rule in reverse order
 void push_list(NODE * rule_head, struct StackNode ** stack){
-    if(rule_head ==  NULL){
+    if(rule_head ==  NULL || (rule_head->sym.is_terminal && rule_head->sym.t == TK_EPS)) {
         return;
     }
     push_list(rule_head->next, stack);
