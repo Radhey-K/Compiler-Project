@@ -1216,9 +1216,9 @@ int main(){
     TOKEN curr;
     while(1){
         if(call_token){
-            curr = tokenizer(stable);
+            // curr = tokenizer(stable);
         }
-        
+
     }
 }
 
