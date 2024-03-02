@@ -1,6 +1,6 @@
 // #include "lexer.h"
 #define NUM_RULES 95
-#define NUM_TOKENS 61
+#define NUM_TOKENS 62
 #define NUM_NON_TERMINALS 53
 #define MAX_FOLLOW_SET_SIZE 100
 #include <stdio.h>
@@ -217,7 +217,6 @@ int symEqual(symbol s1, symbol s2){
 void merge_list(FIRST* f1, FIRST* f2, int flag){
     NODE* temp=f1->head;
     NODE* temp1=f2->head;
-    // printf("%s\n",tokenToString(temp1->sym.nt));
     NODE* root=f2->head;
 
     if(temp!=NULL){
@@ -318,7 +317,6 @@ void find_first_set(symbol sym){
 }
 
 
-
 NODE* find_unique(NODE* root){ // use in follow set generation, not needed in first generation
     NODE* temp = root;
     if(temp==NULL) return NULL; // Add null check
@@ -349,15 +347,15 @@ NODE* find_unique(NODE* root){ // use in follow set generation, not needed in fi
             curr=curr->next;
         }
     }
-    for(int i=0; i<NUM_NON_TERMINALS; i++){
-        if(non_terminal_cnt[i]>0){
-            curr->next = (NODE*)malloc(sizeof(NODE));
-            curr->next->sym.is_terminal=0;
-            curr->next->sym.nt=i;
-            curr->next->next=NULL;
-            curr=curr->next;
-        }
-    }
+    // for(int i=0; i<NUM_NON_TERMINALS; i++){
+    //     if(non_terminal_cnt[i]>0){
+    //         curr->next = (NODE*)malloc(sizeof(NODE));
+    //         curr->next->sym.is_terminal=0;
+    //         curr->next->sym.nt=i;
+    //         curr->next->next=NULL;
+    //         curr=curr->next;
+    //     }
+    // }
     return head;
 }
 
@@ -373,103 +371,12 @@ void print_list(NODE* root){
     printf("\n");
 }
 
-// typedef struct follow{
-//     NODE* head;
-//     int is_filled;
-    // int is_epsilon;
-// }FOLLOW;
 
 // We dont need a different struct for follow as first has the same fields as follow. isEpsilon will always be 0
 FIRST* FOLLOW_NT[NUM_NON_TERMINALS];
 FIRST* FOLLOW_T[NUM_TOKENS];
 
-
-// void findFollow(symbol sym){
-//     printf("1\n");
-
-//     if(sym.is_terminal==0 && sym.nt==program){
-//         FOLLOW_NT[program]=(FIRST*)malloc(sizeof(FIRST));
-//         symbol s;
-//         s.is_terminal=0;
-//         s.t=TK_DOLLAR;
-//         FOLLOW_NT[program]->head=(NODE*)malloc(sizeof(NODE));
-//         FOLLOW_NT[program]->head->sym=s;
-//         FOLLOW_NT[program]->head->next=NULL;
-//         FOLLOW_NT[program]->is_filled=1;
-//         FOLLOW_NT[program]->has_epsilon=0;
-//         return;
-//     }
-
-//     if(FOLLOW_NT[sym.nt]!=NULL && FOLLOW_NT[sym.nt]->is_filled==1) return;
-
-
-//     FIRST* ptr = (FIRST*)malloc(sizeof(FIRST));
-//     ptr->head=NULL;
-
-//     if(sym.is_terminal==1){
-//         FOLLOW_T[sym.t]=(FIRST*)malloc(sizeof(FIRST));
-//         symbol s;
-//         s.is_terminal=1;
-//         s.t=sym.t;
-//         FOLLOW_T[sym.t]->head->sym=s;
-//         FOLLOW_T[sym.t]->head->next=NULL;
-//         FOLLOW_T[sym.t]->is_filled=1;
-//         FOLLOW_T[sym.t]->has_epsilon=0;
-//         return;
-//     }
-    
-
-//     for(int i=0; i<NUM_RULES; i++){
-//         if(rules[i].sym.nt==sym.nt){
-//             NODE* temp=rules[i].next;
-//             while(temp!=NULL){
-//                 if(temp->next==NULL){
-//                     merge_list(ptr,FIRST_NT[temp->sym.nt],0);
-//                     // if(FIRST_NT[temp->sym.nt]->has_epsilon==1){
-//                     //     merge_list(ptr,FOLLOW_NT[rules[i].sym.nt],0);
-//                     // }
-//                     break;
-//                 }
-//                 temp=temp->next;
-//             }
-//         }
-
-//         else{
-            
-//             NODE* temp=rules[i].next;
-//             while(temp!=NULL){
-//                 if(temp->sym.is_terminal==0 && temp->sym.nt==sym.nt){
-//                     if(temp->next==NULL){
-//                         findFollow(rules[i].sym);
-//                         merge_list(ptr,FOLLOW_NT[rules[i].sym.nt],0);
-//                     }
-//                     else{
-                        
-//                         // printf("%s\n",nonterminaltoString(temp->next->sym.nt));
-//                         // print_list(FIRST_NT[2]->head);
-//                         if(temp->next->sym.is_terminal==0){
-//                             // printf("2\n");
-//                             // printf("%d\n",temp->next->sym.nt);
-//                             // if(FIRST_NT[temp->next->sym.nt]->head==NULL)printf("its null\n");
-//                             merge_list(ptr,FIRST_NT[temp->next->sym.nt],0);
-//                         }
-                        
-//                         else merge_list(ptr,FIRST_T[temp->next->sym.t],0);
-                        
-//                         // The below commented part has not been added yet
-//                         // while the next token has epsilon in its first set, add the first of the next to next token to the follow set of the current token
-//                     }
-//                 }
-//                 temp=temp->next;
-//             }
-//         }
-//     }
-
-//     ptr->is_filled=1;
-//     find_unique(ptr->head);
-// }
-
-
+// Copies the follow set from src to dest
 void copyFollowSet(FIRST* dest, FIRST* src){
     dest->head = NULL;
     dest->is_filled = src->is_filled;
@@ -494,6 +401,7 @@ void copyFollowSet(FIRST* dest, FIRST* src){
         srcNode = srcNode->next;
     }
 }
+
 // This function is only applied to follow sets of non-terminals
 int isEpsilonInFollow(NODE* head){
     NODE* node = head;
@@ -506,6 +414,7 @@ int isEpsilonInFollow(NODE* head){
     return 0;
 }
 
+// If the follow set have epsilon, this function removes it
 void removeEpsFromFollow(FIRST* followSet){
     NODE* node = followSet->head;
     NODE* prev = NULL;
@@ -524,6 +433,7 @@ void removeEpsFromFollow(FIRST* followSet){
     }
 }
 
+// Checks if the two follow sets are equal
 int compareFollowSetsForEquality(FIRST* f1, FIRST* f2) {
     int tokens[NUM_TOKENS] = {0}; // Array to mark tokens in f1
     int tokens2[NUM_TOKENS] = {0}; // Array to mark tokens in f2
@@ -555,7 +465,8 @@ int compareFollowSetsForEquality(FIRST* f1, FIRST* f2) {
     return 0; // Arrays are equal
 }
 
-void allocateMemoryToFollowSet(){
+// Allocate memory to the follow sets and initialize them to empty. Follow sets of program and mainFunction are initialized to $.
+void allocateMemoryAndInitializeToFollowSet(){
     for(int i=0;i<NUM_NON_TERMINALS;i++){
         FOLLOW_NT[i]=(FIRST*)malloc(sizeof(FIRST));
         FOLLOW_NT[i]->head=NULL;
@@ -568,6 +479,22 @@ void allocateMemoryToFollowSet(){
         FOLLOW_T[i]->is_filled=0;
         FOLLOW_T[i]->has_epsilon=0;
     }
+
+    symbol s;
+    s.is_terminal=0;
+    s.t=TK_DOLLAR;
+
+    FOLLOW_NT[program]->head=(NODE*)malloc(sizeof(NODE));
+    FOLLOW_NT[program]->head->sym=s;
+    FOLLOW_NT[program]->head->next=NULL;
+    FOLLOW_NT[program]->is_filled=1;
+    FOLLOW_NT[program]->has_epsilon=0;
+
+    FOLLOW_NT[mainFunction]->head=(NODE*)malloc(sizeof(NODE));
+    FOLLOW_NT[mainFunction]->head->sym=s;
+    FOLLOW_NT[mainFunction]->head->next=NULL;
+    FOLLOW_NT[mainFunction]->is_filled=1;
+    FOLLOW_NT[mainFunction]->has_epsilon=0;
 
 }
 
@@ -597,44 +524,32 @@ void removeProgramNonTerminalFromFollow() {
     }
 }
 
+// Find the follow sets of the non-terminals in the grammar
 void findFollowSet(){
-    // printf("1\n");
-    allocateMemoryToFollowSet();
+    allocateMemoryAndInitializeToFollowSet();
     int isChanged=1;
     int lhs;
     int rhs_sym;
     NODE* rhs;
 
-    FOLLOW_NT[program]=(FIRST*)malloc(sizeof(FIRST));
-    symbol s;
-    s.is_terminal=0;
-    s.t=TK_DOLLAR;
-    FOLLOW_NT[program]->head=(NODE*)malloc(sizeof(NODE));
-    FOLLOW_NT[program]->head->sym=s;
-    FOLLOW_NT[program]->head->next=NULL;
-    FOLLOW_NT[program]->is_filled=1;
-    FOLLOW_NT[program]->has_epsilon=0;
-    
-
     while(isChanged==1){
-        // printf("2\n");
         isChanged=0;
         for(int i=0;i<NUM_RULES;i++){
-            // printf("Rule no. %d\n", i+1);
+            
             lhs=rules[i].sym.nt;
             rhs=rules[i].next;
             NODE* temp=rhs;
 
             while(temp!=NULL){
-                // printf("3\n");
-                if(temp->sym.is_terminal==0){
-                    // printf("4\n");
+                if(temp->sym.is_terminal==0 && temp->sym.nt!=mainFunction && temp->sym.nt!=program){
                     rhs_sym=temp->sym.nt;
+
+        
                     FIRST* rhs_rule_set=(FIRST*)malloc(sizeof(FIRST));
-                    // rhs_rule_set->head=NULL;
+                    
                     if(temp->next!=NULL && temp->next->sym.is_terminal==0)copyFollowSet(rhs_rule_set,FIRST_NT[temp->next->sym.nt]);
                     else if(temp->next!=NULL) copyFollowSet(rhs_rule_set,FIRST_T[temp->next->sym.t]);
-                    // printf("5\n");
+
 
                     FIRST* temp_follow=(FIRST*)malloc(sizeof(FIRST));
                     temp_follow->head=(NODE*)malloc(sizeof(NODE));
@@ -650,23 +565,41 @@ void findFollowSet(){
 
                     merge_list(FOLLOW_NT[rhs_sym],rhs_rule_set,0);
                     FOLLOW_NT[rhs_sym]->head=find_unique(FOLLOW_NT[rhs_sym]->head);
-                    
 
-                    // printf("6\n");
-
-                    if(isEpsInRhs==1 || temp->next==NULL){
+                    if( temp->next==NULL){
                         if(rhs_sym!=lhs)merge_list(FOLLOW_NT[rhs_sym],FOLLOW_NT[lhs],0);
                         FOLLOW_NT[rhs_sym]->head=find_unique(FOLLOW_NT[rhs_sym]->head);
+                    }
+
+
+                    else if(isEpsInRhs==1 ){
+                        NODE* epsilonTraverse=temp;
+                        int epsilonFlag=1;
+                        while(epsilonFlag==1 && epsilonTraverse->next!=NULL){
+                            epsilonTraverse=epsilonTraverse->next;
+                            if(epsilonTraverse->sym.is_terminal==1){
+                                merge_list(FOLLOW_NT[rhs_sym],FIRST_T[epsilonTraverse->sym.t],0);
+                                epsilonFlag=0;
+                            }else{
+                                merge_list(FOLLOW_NT[rhs_sym],FIRST_NT[epsilonTraverse->sym.nt],0);
+                                if(FIRST_NT[epsilonTraverse->sym.nt]->has_epsilon==0)epsilonFlag=0;
+                            }
+                        }
+
+                        if(epsilonFlag==1){
+                            merge_list(FOLLOW_NT[rhs_sym],FOLLOW_NT[lhs],0);
+                        }
+                        FOLLOW_NT[rhs_sym]->head=find_unique(FOLLOW_NT[rhs_sym]->head);
+
                     }
 
                     int check=compareFollowSetsForEquality(temp_follow,FOLLOW_NT[rhs_sym]);
                     if(check==1)isChanged=1;
                     
                     free(temp_follow);
+                    free(rhs_rule_set);
 
-                    // printf("7\n");
                 }
-                // printf("\n");
                 temp = temp->next;
             }
         }
@@ -1163,65 +1096,43 @@ int main(){
         sym.is_terminal=0;
         sym.nt=i;
         find_first_set(sym);
-        // find_unique(FIRST_NT[i]->head);
-
-        // if(sym.is_terminal == 1){
-        //     printf("%s ", tokenToString(sym.t));
-        // }else{
-        //     printf("%s ", nonterminaltoString(sym.nt));
-        // }
-        // printf("\n");
-
     }
+
     // for(int i=0; i<NUM_TOKENS; i++){
     //     print_list(FIRST_T[i]->head);
     // }
     // for(int i=0; i<NUM_NON_TERMINALS; i++){
+    //     printf("%s ==>\t",nonterminaltoString(i));
     //     print_list(FIRST_NT[i]->head);
     // }
 
-    // FIRST_NT[10]->head=find_unique(FIRST_NT[10]->head);
-
+    // Find the follow sets of the non-terminals in the grammar
     findFollowSet();
-
+    
+    // Print the follow sets
     for(int i=0; i<NUM_NON_TERMINALS; i++){
         printf("%s ==>\t",nonterminaltoString(i));
         print_list(FOLLOW_NT[i]->head);
     }
 
 
-    printf("\n\n PREDICTIVE TABLE VALID ENTRIES : \n\n");
-    NODE ** predictive_table = generate_predictive_table(rules);
 
-    for(int i = 0; i < NUM_NON_TERMINALS; i++){
-        for(int j = 0; j < NUM_TOKENS; j++){
-            if((predictive_table[i][j].next) != NULL){
-                nonterminal a = i;
-                tokName b = j;
-                printf("%s (on) %s : ", nonterminaltoString(a), tokenToString(b));
-                print_list(predictive_table[i]+j);
-            }else{
-                // Rest are errors
-                // printf("%d, %d : ERROR \n", i,j);
-            }
-        }
-    }
 
-    // symbol sym;
-    // sym.is_terminal=0;
-    // sym.nt=otherFunctions;
-    // findFollow(sym);
-    // print_list(FOLLOW_NT[sym.nt]->head);
+    // printf("\n\n PREDICTIVE TABLE VALID ENTRIES : \n\n");
+    // NODE ** predictive_table = generate_predictive_table(rules);
 
-    // for(int i=0; i<NUM_NON_TERMINALS; i++){
-    //     symbol sym;
-    //     sym.is_terminal=0;
-    //     sym.nt=i;
-    //     findFollow(sym);
-    // }
-
-    // for(int i=0; i<NUM_NON_TERMINALS; i++){
-    //     print_list(FOLLOW_NT[i]->head);
+    // for(int i = 0; i < NUM_NON_TERMINALS; i++){
+    //     for(int j = 0; j < NUM_TOKENS; j++){
+    //         if((predictive_table[i][j].next) != NULL){
+    //             nonterminal a = i;
+    //             tokName b = j;
+    //             printf("%s (on) %s : ", nonterminaltoString(a), tokenToString(b));
+    //             print_list(predictive_table[i]+j);
+    //         }else{
+    //             // Rest are errors
+    //             // printf("%d, %d : ERROR \n", i,j);
+    //         }
+    //     }
     // }
 
 
@@ -1311,7 +1222,6 @@ const char* tokenToString(tokName token) {
         case TK_ERROR: return "TK_ERROR";
         case TK_EPS: return "TK_EPS";
         case TK_DOLLAR: return "TK_DOLLAR";
-
         default: return "Unknown Token";
     }
 }
