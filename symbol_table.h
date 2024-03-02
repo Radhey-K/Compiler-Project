@@ -38,4 +38,6 @@ ST_ELEMENT table_lookup(ST stable, char *lexeme);
 
 void populate_symbol_table(ST stable);
 
+TOKEN tokenizer(ST stable);
+
 #endif
