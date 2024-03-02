@@ -716,6 +716,7 @@ PNODE** generate_predictive_table(NODE * grammar_rules){
     push_syn_tokens(predictive_table);
 
     // Set ERROR tokens
+    populate_predictive_table_error_tokens(predictive_table);
 
     return predictive_table;
 }
