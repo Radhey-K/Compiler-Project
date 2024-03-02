@@ -200,6 +200,12 @@ typedef struct first{
     NODE* head;
 }FIRST;
 
+typedef struct predictive_table_node{
+    NODE *rule_rhs;
+    int is_syn;
+    int is_error;
+} PNODE;
+
 NODE rules[NUM_RULES];
 FIRST* FIRST_T[NUM_TOKENS];
 FIRST* FIRST_NT[NUM_NON_TERMINALS];
@@ -610,22 +616,24 @@ void findFollowSet(){
 }
 
 // Predictive Parse Table Functions -- Add NULL error checks
-NODE** create_predictive_table(){
-    NODE ** predictive_table = (NODE **) malloc(NUM_NON_TERMINALS * sizeof(NODE *));
+PNODE** create_predictive_table(){
+    PNODE ** predictive_table = (PNODE **) malloc(NUM_NON_TERMINALS * sizeof(PNODE *));
     // Not initalizing pointers to structs (will be NULL if not required in final table)
     return predictive_table;
 }
 
 // Our table has one extra column corresponding to EPS token --> never write to eps even if first set contains eps --> should be error always
-void push_rule_to_table(NODE* rule_head, FIRST* first_tokens, NODE** predictive_table){
+void push_rule_to_table(NODE* rule_head, FIRST* first_tokens, PNODE** predictive_table){
     nonterminal rule_lhs = rule_head->sym.nt;
     NODE * table_terminal_tokens = first_tokens->head;
     while(table_terminal_tokens != NULL){
         if(table_terminal_tokens->sym.t != TK_EPS){
             if(predictive_table[rule_lhs] == NULL){
-                *(predictive_table + rule_lhs) = (NODE *) malloc(NUM_TOKENS * sizeof(NODE));
+                *(predictive_table + rule_lhs) = (PNODE *) malloc(NUM_TOKENS * sizeof(PNODE));
             }
-            predictive_table[rule_lhs][table_terminal_tokens->sym.t] = *(rule_head->next); // Just pushing RHS of the grammar rule
+            predictive_table[rule_lhs][table_terminal_tokens->sym.t].rule_rhs = (rule_head->next); // Only RHS of grammar rule
+            predictive_table[rule_lhs][table_terminal_tokens->sym.t].is_error = 0;
+            predictive_table[rule_lhs][table_terminal_tokens->sym.t].is_syn = 0;
         }
         table_terminal_tokens = table_terminal_tokens->next;
     }
@@ -666,11 +674,49 @@ void parse_grammar_rule_for_table(NODE* rule_head, NODE** predictive_table) {
     }
 }
 
-NODE** generate_predictive_table(NODE * grammar_rules){
-    NODE ** predictive_table = create_predictive_table(); // Unpopulated
+void push_syn_for_nt(PNODE** predictive_table, FIRST * cur_first_follow, nonterminal cur_nt){
+    NODE * first_head = cur_first_follow->head;
+    while(first_head != NULL){
+        // skip if epsilon or rule already in place for this in table
+        if(first_head->sym.t != TK_EPS && predictive_table[cur_nt][first_head->sym.t].rule_rhs != NULL){
+            predictive_table[cur_nt][first_head->sym.t].is_syn = 1;
+            predictive_table[cur_nt][first_head->sym.t].is_syn = 0;
+        }
+        first_head = first_head->next;
+    }
+}
+
+void populate_predictive_table_syn_tokens(PNODE** predictive_table){
+    // For all NT's if FIRST NT's node NULL or FOLLOW(NT) node NULL
+    for(int i = 0 ; i < NUM_NON_TERMINALS; i++){
+        FIRST* cur_first = FIRST_NT[i];
+        FIRST* cur_follow = FOLLOW_NT[i];
+        push_syn_for_nt(predictive_table, cur_first, i);
+        push_syn_for_nt(predictive_table, cur_follow, i);
+    }
+}
+
+void populate_predictive_table_error_tokens(PNODE ** predictive_table){
+    for(int i = 0; i < NUM_NON_TERMINALS; i++){
+        for(int j = 0;  j < NUM_TOKENS; j++){
+            // Syn should have already been populated for required tokens
+            if(predictive_table[i][j].rule_rhs != NULL && predictive_table[i][j].is_syn == 0){
+                predictive_table[i][j].is_error = 1;
+            }
+        }
+    }
+}
+
+PNODE** generate_predictive_table(NODE * grammar_rules){
+    PNODE ** predictive_table = create_predictive_table(); // Unpopulated
     for(int i = 0; i < NUM_RULES; i++){
         parse_grammar_rule_for_table((grammar_rules+i), predictive_table);
     }
+    // Add SYN tokens
+    push_syn_tokens(predictive_table);
+
+    // Set ERROR tokens
+
     return predictive_table;
 }
 
