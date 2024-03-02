@@ -1,4 +1,4 @@
-// #include "lexer.h"
+#include "lexer.h"
 #define NUM_RULES 95
 #define NUM_TOKENS 62
 #define NUM_NON_TERMINALS 53
@@ -7,7 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-// #include "symbol_table.h"
+#include "stack.h"
+#include "symbol_table.h"
 
 // REMOVE LATER-START
 #define TABLE_SIZE 197
@@ -171,14 +172,14 @@ struct symbol_table {
 
 
 
-typedef struct{
-    union
-    {
-        tokName t;
-        nonterminal nt;
-    };
-    int is_terminal;
-} symbol;
+// typedef struct{
+//     union
+//     {
+//         tokName t;
+//         nonterminal nt;
+//     };
+//     int is_terminal;
+// } symbol;
 
 
 typedef struct node{
@@ -1110,10 +1111,10 @@ int main(){
     findFollowSet();
     
     // Print the follow sets
-    for(int i=0; i<NUM_NON_TERMINALS; i++){
-        printf("%s ==>\t",nonterminaltoString(i));
-        print_list(FOLLOW_NT[i]->head);
-    }
+    // for(int i=0; i<NUM_NON_TERMINALS; i++){
+    //     printf("%s ==>\t",nonterminaltoString(i));
+    //     print_list(FOLLOW_NT[i]->head);
+    // }
 
 
 
@@ -1155,6 +1156,23 @@ int main(){
     //     }
     //     printf("\n");
     // }
+
+    struct StackNode* stack = NULL;
+    symbol sym1 = {.t = TK_DOLLAR, .is_terminal = 1};
+    push(&stack, sym1);
+    symbol sym2 = {.nt = program, .is_terminal = 0};
+    push(&stack, sym2);
+    ST stable = create_symbol_table();
+    populate_symbol_table(stable);
+    
+    int call_token=1;
+    TOKEN curr;
+    while(1){
+        if(call_token){
+            curr = tokenizer(stable);
+        }
+        
+    }
 }
 
 
@@ -1284,6 +1302,12 @@ const char* nonterminaltoString(nonterminal nt) {
         case TK_DOLLAR : return "TK_DOLLAR";
         default: return "Unknown";
     }
+}
+
+
+
+void parsing(){
+
 }
 
 
