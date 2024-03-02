@@ -1877,6 +1877,15 @@ int getNonTerminal(char* token) {
     }
 }
 
+// Push rule in reverse order
+void push_list(NODE * rule_head, struct StackNode ** stack){
+    if(rule_head ==  NULL){
+        return;
+    }
+    push_list(rule_head->next, stack);
+    push(stack, rule_head->sym);
+}
+
 int main(){
 
     FILE *fp = fopen("test_grammar.txt", "r");
