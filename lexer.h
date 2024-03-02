@@ -5,16 +5,6 @@
 #define MAX_FUN_ID_SIZE 30
 // #define MAX_RU_ID_SIZE 20
 
-typedef struct{
-    union
-    {
-        tokName t;
-        nonterminal nt;
-    };
-    int is_terminal;
-} symbol;
-
-
 
 //Need to add more
 typedef enum {
@@ -148,8 +138,16 @@ typedef struct token {
 
 } TOKEN;
 
+typedef struct{
+    union
+    {
+        tokName t;
+        nonterminal nt;
+    };
+    int is_terminal;
+} symbol;
+
 const char* nonterminaltoString(nonterminal nt);
 const char* tokenToString(tokName token);
-TOKEN tokenizer(ST stable);
 
 #endif

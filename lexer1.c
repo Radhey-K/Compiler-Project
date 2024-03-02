@@ -345,7 +345,6 @@ TOKEN tokenizer(ST stable)
                     state = 57;
                 else if (character == '%')
                     state = 61;
-
                 else if (character == '\n')
                     state = 62;
                 else if (character == EOF)
@@ -353,6 +352,14 @@ TOKEN tokenizer(ST stable)
                     token.name = TK_EOF;
                     return token;
                 }
+                else if (character == '\r')
+                    state = 0;
+                else if (character == '\t') {
+                    lexemeBegin = forwardPtr;
+                    state = 0;
+                }
+                else
+                    state = 63;
 
                 break;
         
@@ -370,7 +377,7 @@ TOKEN tokenizer(ST stable)
 
         case 3: character = getCharacter();
                 if(isDigit(character)) state = 4;
-                else exit(0);  // Error
+                else state = 60;  // Error
                 break;
 
         case 4: character = getCharacter();
@@ -456,7 +463,7 @@ TOKEN tokenizer(ST stable)
 
         case 15:    retract(1); //TK_ID
                     if(lexeme_length() > MAX_VAR_ID_SIZE){
-                        state = 60;
+                        state = 65;
                         break;
                     }
                     token.name = TK_ID;
@@ -607,7 +614,7 @@ TOKEN tokenizer(ST stable)
             break;
 
         case 29:
-            // retraction needed
+            retract(1);
             token.name = TK_LT;
             strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
@@ -617,6 +624,7 @@ TOKEN tokenizer(ST stable)
             break;
 
         case 30:
+            retract(2);
             token.name = TK_LT;
             strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
@@ -669,7 +677,7 @@ TOKEN tokenizer(ST stable)
             break;
 
         case 36:
-            // retraction needed
+            retract(1);
             token.name = TK_GT;
             strcpy(token.string, tokenFromPtrs());
             token.lineNo = lineNo;
@@ -800,15 +808,13 @@ TOKEN tokenizer(ST stable)
             break;
 
         case 51:
-                token.name=TK_OP;
-                strcpy(token.string,"(");
-                token.lineNo=lineNo;
-                state=0;
-                lexemeBegin=forwardPtr;
-                return token;
-                break;
-
-
+            token.name=TK_OP;
+            strcpy(token.string,"(");
+            token.lineNo=lineNo;
+            state=0;
+            lexemeBegin=forwardPtr;
+            return token;
+            break;
 
         case 52:
             token.name=TK_CL;
@@ -875,7 +881,8 @@ TOKEN tokenizer(ST stable)
             retract(1);
             token.name = TK_ERROR;
             token.lineNo = lineNo;
-            strcpy(token.string, tokenFromPtrs());
+            strcpy(token.string, "pattern");
+            strcat(token.string, tokenFromPtrs());
             state = 0;
             lexemeBegin = forwardPtr;
             return token;
@@ -889,11 +896,12 @@ TOKEN tokenizer(ST stable)
             if (character == '\n')
             {
                 // printf("%d",forwardPtr);
-                state=62;
+                state=64;
             }
             else if (character == EOF)
             {
                 token.name = TK_EOF;
+                token.lineNo = lineNo;
                 return token;
             }
             else
@@ -907,46 +915,92 @@ TOKEN tokenizer(ST stable)
             forwardPtr++;
             lexemeBegin = forwardPtr;
             break;
+
+        case 63:
+            token.name = TK_ERROR;
+            token.lineNo = lineNo;
+            strcpy(token.string, "symbol");
+            strcat(token.string, tokenFromPtrs());
+            state = 0;
+            lexemeBegin = forwardPtr;
+            return token;
+            break;
+
+        case 64:
+            token.name = TK_COMMENT;
+            strcpy(token.string, "%");
+            token.lineNo = lineNo;
+            lineNo++;
+            state = 0;
+            forwardPtr++;
+            lexemeBegin = forwardPtr;
+            return token;
+            break;
+
+        case 65:
+            token.name = TK_ERROR;
+            token.lineNo = lineNo;
+            strcpy(token.string, "size");
+            strcat(token.string, tokenFromPtrs());
+            state = 0;
+            lexemeBegin = forwardPtr;
+            return token;
+            break;
         }
     }
 }
 
-// int main()
-// {
-//     clock_t start_time, end_time;
-//     double total_CPU_time, total_CPU_time_in_seconds;
-//     start_time = clock();
+int main()
+{
+    clock_t start_time, end_time;
+    double total_CPU_time, total_CPU_time_in_seconds;
+    start_time = clock();
 
-//     filePointer = fopen("test.txt", "r");
-//     populateBuffer(0);
-//     populateBuffer(1);
-//     lexemeBegin = 0;
-//     forwardPtr = 0;
-//     // printf("%s",tokenFromPtrs());
-//     // printf("%c",buffer[forwardPtr]);
+    filePointer = fopen("test.txt", "r");
+    populateBuffer(0);
+    populateBuffer(1);
+    lexemeBegin = 0;
+    forwardPtr = 0;
+    // printf("%s",tokenFromPtrs());
+    // printf("%c",buffer[forwardPtr]);
 
-//     // Initalize and pre-populate symbol table
-//     ST stable = create_symbol_table();
-//     populate_symbol_table(stable);
+    // Initalize and pre-populate symbol table
+    ST stable = create_symbol_table();
+    populate_symbol_table(stable);
 
-//     while (buffer[forwardPtr] != EOF)
-//     {
-//         TOKEN token = tokenizer(stable);
-//         if (token.integer != -1)
-//             printf("Line No. %d     Lexeme %d       Token %s\n", lineNo, token.integer, tokenToString(token.name));
-//         else if (token.realNum != -1)
-//             printf("Line No. %d     Lexeme %f       Token %s\n", lineNo, token.realNum, tokenToString(token.name));
-//         else
-//             printf("Line No. %d     Lexeme %s       Token %s\n", lineNo, token.string, tokenToString(token.name));
+    while (buffer[forwardPtr] != EOF)
+    {
+        TOKEN token = tokenizer(stable);
+        if (token.name == TK_EOF)
+            break;
+        else if (strstr(token.string, "pattern") != NULL) {
+            char *substring = strstr(token.string, "pattern");
+            substring += strlen("pattern");
+            printf("Line no. %d: Error : Unknown pattern <%s>\n", token.lineNo, substring);
+        }
+        else if (strstr(token.string, "size") != NULL) {
+            char *substring = strstr(token.string, "size");
+            substring += strlen("size");
+            printf("Line no. %d: Error : Variable Identifier is longer than the prescribed length of 20 characters.\n", token.lineNo);
+        }
+        else if (strstr(token.string, "symbol") != NULL) {
+            char *substring = strstr(token.string, "symbol");
+            substring += strlen("symbol");
+            printf("Line no. %d: Error : Unknown symbol <%s>\n", token.lineNo, substring);
+        }
+        else if (token.integer != -1)
+            printf("Line No. %d     Lexeme %d       Token %s\n", token.lineNo, token.integer, tokenToString(token.name));
+        else if (token.realNum != -1)
+            printf("Line No. %d     Lexeme %.2f       Token %s\n", token.lineNo, token.realNum, tokenToString(token.name));
+        else
+            printf("Line No. %d     Lexeme %s       Token %s\n", token.lineNo, token.string, tokenToString(token.name));
 
-//         if (token.name == TK_EOF)
-//             break;
-//     }
+    }
 
-//     end_time = clock();
-//     total_CPU_time = (double) (end_time - start_time);
-//     total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
-//     printf("Total CPU time: %f\n", total_CPU_time);
-//     printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
-//     printf("Symbol table entries (includes prepopulation 51) : %d \n", stable->token_count);
-// }
+    end_time = clock();
+    total_CPU_time = (double) (end_time - start_time);
+    total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
+    printf("Total CPU time: %f\n", total_CPU_time);
+    printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
+    printf("Symbol table entries (includes prepopulation 51) : %d \n", stable->token_count);
+}
