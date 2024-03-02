@@ -5,15 +5,15 @@
 #include <stdlib.h>
 
 // Define your symbol struct
-typedef struct
-{
-    union
-    {
-        tokName t;
-        nonterminal nt;
-    };
-    int is_terminal;
-} symbol;
+// typedef struct
+// {
+//     union
+//     {
+//         tokName t;
+//         nonterminal nt;
+//     };
+//     int is_terminal;
+// } symbol;
 
 // Define a structure for a stack node
 struct StackNode
