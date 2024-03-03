@@ -3,7 +3,7 @@
 
 #define MAX_VAR_ID_SIZE 20
 #define MAX_FUN_ID_SIZE 30
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 200
 
 typedef enum {
     TK_UNKNOWN, // For symbol table entry init
