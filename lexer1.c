@@ -11,7 +11,6 @@
 #define BUFFER_SIZE 1000
 
 
-
 // State for dfa
 int state = 0;
 
@@ -388,17 +387,17 @@ TOKEN tokenizer(ST stable)
         case 5: character = getCharacter();
                 if (character == '+' || character == '-') state = 6;
                 else if (isDigit(character)) state = 7;
-                else exit(0);  // Error
+                else state = 60;  // Error
                 break;
 
         case 6: character = getCharacter();
                 if (isDigit(character)) state = 7;
-                else exit(0);  // Error
+                else state = 60;  // Error
                 break;
 
         case 7: character = getCharacter();
                 if (isDigit(character)) state = 8;
-                else exit(0);
+                else state = 60;
                 break;
 
         case 8: // TK_RNUM
@@ -994,9 +993,7 @@ int main()
             printf("Line No. %d     Lexeme %.2f       Token %s\n", token.lineNo, token.realNum, tokenToString(token.name));
         else
             printf("Line No. %d     Lexeme %s       Token %s\n", token.lineNo, token.string, tokenToString(token.name));
-
     }
-
     end_time = clock();
     total_CPU_time = (double) (end_time - start_time);
     total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
