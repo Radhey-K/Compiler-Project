@@ -17,6 +17,7 @@
 #include <ctype.h>
 #include <time.h>
 #include "symbol_table.h"
+#include "parsetree.h"
 
 #define BUFFER_SIZE 1000
 
@@ -1878,12 +1879,33 @@ int getNonTerminal(char* token) {
 }
 
 // Push rule in reverse order
-void push_list(NODE * rule_head, struct StackNode ** stack){
-    if(rule_head ==  NULL || (rule_head->sym.is_terminal && rule_head->sym.t == TK_EPS)) {
+// void push_list(NODE * rule_head, struct StackNode ** stack){
+//     if(rule_head ==  NULL || (rule_head->sym.is_terminal && rule_head->sym.t == TK_EPS)) {
+//         return;
+//     }
+//     push_list(rule_head->next, stack);
+//     push(stack, rule_head->sym);
+// }
+
+void push_list(NODE * rule_head, struct StackNode ** stack, Node * treeNode, int syn_eps){
+    if(syn_eps){
+        // Adding NT --> e if syn encountered
+        symbol eps;
+        eps.is_terminal = 1;
+        eps.t = TK_EPS;
+        add_child(NULL, treeNode, eps);
         return;
     }
-    push_list(rule_head->next, stack);
-    push(stack, rule_head->sym);
+    if(rule_head ==  NULL) {
+        return;
+    }else if(rule_head->sym.is_terminal && rule_head->sym.t == TK_EPS) { // Don't push to stack but write to tree
+        add_child(NULL, treeNode, rule_head->sym);
+        return;
+    }
+    push_list(rule_head->next, stack, treeNode, 0);
+    // ADD child + push child pointer into stack along with the current sym
+    Node * tree_child_pointer = add_child(NULL, treeNode, rule_head->sym);
+    push(stack, rule_head->sym,tree_child_pointer);
 }
 
 int main(){
@@ -2015,10 +2037,15 @@ int main(){
     // }
 
     struct StackNode* stack = NULL;
+    // TK_DOLLAR not in tree
     symbol sym1 = {.t = TK_DOLLAR, .is_terminal = 1};
-    push(&stack, sym1);
+    push(&stack, sym1, NULL);
+    
+    // Create root node in tree + push pointer to stack with symbol
     symbol sym2 = {.nt = program, .is_terminal = 0};
-    push(&stack, sym2);
+    ParseTree * ast = create_parse_tree_with_root(sym2);
+    push(&stack, sym2, ast->root);
+
     ST stable = create_symbol_table();
     populate_symbol_table(stable);
 
@@ -2026,24 +2053,59 @@ int main(){
     
     int call_token=1;
     TOKEN curr;
+    // while(1){
+    //     if(call_token){
+    //         curr = tokenizer(stable);
+    //     }
+    //     symbol sym = top(stack);
+    //     if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==0 && predictive_table[sym.nt][curr.name].is_error==0){
+    //         pop(stack);
+    //         push_list(predictive_table[sym.nt][curr.name].rule_rhs, stack);
+    //         call_token=0;
+    //     }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==1){
+    //         pop(stack);
+    //         call_token=0;
+    //     }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_error==1){
+    //         call_token=1;
+    //         continue;
+    //     }else if(sym.is_terminal==1){
+    //         if(sym.t == curr.name){
+    //             pop(stack);
+    //             call_token=1;
+    //             continue;
+    //         }else{
+    //             printf("terminal not matching");
+    //         }
+    //     }
+    // }
+
     while(1){
         if(call_token){
             curr = tokenizer(stable);
         }
-        symbol sym = top(stack);
+        struct StackNode * cur_top = top(stack);
+        symbol sym = cur_top->data;
         if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==0 && predictive_table[sym.nt][curr.name].is_error==0){
             pop(stack);
-            push_list(predictive_table[sym.nt][curr.name].rule_rhs, stack);
+            free(cur_top);
+            // Add RHS production to tree one at a time, also push into stack (with the returned pointer from tree)
+            push_list(predictive_table[sym.nt][curr.name].rule_rhs, stack, cur_top->treeNode, 0);
             call_token=0;
         }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==1){
+            // Add TK_EPS as a child for this node in tree
             pop(stack);
+            free(cur_top);
+            push_list(NULL, stack, cur_top->treeNode, 1);
             call_token=0;
         }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_error==1){
+            // Error recovery --> only advance input pointer
             call_token=1;
             continue;
         }else if(sym.is_terminal==1){
             if(sym.t == curr.name){
+                // If terminal --> no need to add children in tree / nothing to push to stack
                 pop(stack);
+                free(cur_top);
                 call_token=1;
                 continue;
             }else{
