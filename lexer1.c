@@ -976,24 +976,24 @@ int main()
         else if (strstr(token.string, "pattern") != NULL) {
             char *substring = strstr(token.string, "pattern");
             substring += strlen("pattern");
-            printf("Line no. %d: Error : Unknown pattern <%s>\n", token.lineNo, substring);
+            printf("Line no.%3d: Error : Unknown pattern <%s>\n", token.lineNo, substring);
         }
         else if (strstr(token.string, "size") != NULL) {
             char *substring = strstr(token.string, "size");
             substring += strlen("size");
-            printf("Line no. %d: Error : Variable Identifier is longer than the prescribed length of 20 characters.\n", token.lineNo);
+            printf("Line no.%3d: Error : Variable Identifier is longer than the prescribed length of 20 characters.\n", token.lineNo);
         }
         else if (strstr(token.string, "symbol") != NULL) {
             char *substring = strstr(token.string, "symbol");
             substring += strlen("symbol");
-            printf("Line no. %d: Error : Unknown symbol <%s>\n", token.lineNo, substring);
+            printf("Line no.%3d: Error : Unknown symbol <%s>\n", token.lineNo, substring);
         }
         else if (token.integer != -1)
-            printf("Line No. %d     Lexeme %d       Token %s\n", token.lineNo, token.integer, tokenToString(token.name));
+            printf("Line no.%3d        Lexeme:%20d\t        Token:%15s\n", token.lineNo, token.integer, tokenToString(token.name));
         else if (token.realNum != -1)
-            printf("Line No. %d     Lexeme %.2f       Token %s\n", token.lineNo, token.realNum, tokenToString(token.name));
+            printf("Line no.%3d        Lexeme:%20.2f\t        Token:%15s\n", token.lineNo, token.realNum, tokenToString(token.name));
         else
-            printf("Line No. %d     Lexeme %s       Token %s\n", token.lineNo, token.string, tokenToString(token.name));
+            printf("Line no.%3d        Lexeme:%20s\t        Token:%15s\n", token.lineNo, token.string, tokenToString(token.name));
 
     }
 
