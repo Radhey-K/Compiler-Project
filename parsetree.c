@@ -59,7 +59,6 @@ void destroy_parse_tree(ParseTree *tree)
     }
 }
 
-// Add Child: Return a pointer to a node
 Node *add_child(ParseTree *tree, Node *parent, symbol child_value)
 {
     if (parent == NULL)
@@ -74,6 +73,12 @@ Node *add_child(ParseTree *tree, Node *parent, symbol child_value)
         return NULL; // Memory reallocation failed
     }
 
+    // Shift existing children to the right to make space for the new child
+    for (size_t i = parent->num_children; i > 0; i--)
+    {
+        parent->children[i] = parent->children[i - 1];
+    }
+
     // Allocate memory for the new child node
     Node *new_child = (Node *)malloc(sizeof(Node));
     if (new_child == NULL)
@@ -86,8 +91,9 @@ Node *add_child(ParseTree *tree, Node *parent, symbol child_value)
     new_child->children = NULL;
     new_child->num_children = 0;
 
-    // Add the new child to the parent's children array
-    parent->children[parent->num_children++] = new_child;
+    // Add the new child to the beginning of the parent's children array
+    parent->children[0] = new_child;
+    parent->num_children++;
 
     return new_child;
 }
