@@ -2034,6 +2034,21 @@ int main(){
         if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==0 && predictive_table[sym.nt][curr.name].is_error==0){
             pop(stack);
             push_list(predictive_table[sym.nt][curr.name].rule_rhs, stack);
+            call_token=0;
+        }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==1){
+            pop(stack);
+            call_token=0;
+        }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_error==1){
+            call_token=1;
+            continue;
+        }else if(sym.is_terminal==1){
+            if(sym.t == curr.name){
+                pop(stack);
+                call_token=1;
+                continue;
+            }else{
+                printf("terminal not matching");
+            }
         }
     }
 }
