@@ -230,6 +230,7 @@ char getCharacter()
     }
 
     if ((int)buffer[forwardPtr] == '\n'){
+        forwardPtr++;
         return '\n';
     }
 
@@ -302,7 +303,7 @@ TOKEN tokenizer(ST stable)
     TOKEN token;
     token.integer = -1;
     token.realNum = -1;
-    token.string = (char*)malloc(sizeof(char) * 20);
+    token.string = (char*)malloc(sizeof(char) * 50);
     ST_ELEMENT ele; // for lookup
     // Need to initialize the lexemeBegin and forwardPtrs too
     while (true)
@@ -932,7 +933,7 @@ TOKEN tokenizer(ST stable)
         case 62:
             lineNo++;
             state = 0;
-            forwardPtr++;
+            // forwardPtr++;
             lexemeBegin = forwardPtr;
             break;
 
@@ -952,7 +953,7 @@ TOKEN tokenizer(ST stable)
             token.lineNo = lineNo;
             lineNo++;
             state = 0;
-            forwardPtr++;
+            // forwardPtr++;
             lexemeBegin = forwardPtr;
             return token;
             break;
