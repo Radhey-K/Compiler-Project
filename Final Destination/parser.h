@@ -2,7 +2,7 @@
 #define PARSER_H
 #include "parserDef.h"
 
-
+void parser_main(char * filename);
 void merge_list(FIRST* f1, FIRST* f2, int flag);
 void find_first_set(symbol sym);
 NODE* find_unique(NODE* root);

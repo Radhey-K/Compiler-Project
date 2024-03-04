@@ -1,7 +1,7 @@
 CC = gcc
 
 # Define the source files
-SRCS = driver.c lexer.c symbol_table.c
+SRCS = driver.c lexer.c symbol_table.c parser.c parsetree.c stack.c
 
 # Define the target executable
 TARGET = lexer

@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include "lexerDef.h"
 #include "symbol_table.h"
+#include "parser.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -47,6 +48,11 @@ int main(void) {
         }
         else if (option == 3) {
             // print parse tree
+            char *filename = malloc(100 * sizeof(char));
+            printf("Enter the filename: ");
+            scanf("%s", filename);
+            parser_main(filename);
+            printf("\n");
         }
         else if (option == 4) {
             // print total time taken
