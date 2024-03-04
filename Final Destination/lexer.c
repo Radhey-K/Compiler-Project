@@ -1004,6 +1004,7 @@ void lexer_main(char *filename) {
 
 void removeComments(char *filename) {
     char buffer[256];
+    memset(buffer, 0, 256 * sizeof(char));
     FILE *filePointer = fopen(filename, "r");
     if (filePointer == NULL){
         printf("File not found\n");
@@ -1028,8 +1029,9 @@ void removeComments(char *filename) {
             printf("%s\n", buffer);
         }
         fscanf(filePointer, "%c", buffer);
+        memset(buffer, 0, 256 * sizeof(char));
     }
-    printf("\nComments removed and saved in file: %s\n", newfile);
+    printf("\n-----Comments removed and saved in file: %s-----\n", newfile);
     fflush(tempFile);
     fclose(filePointer);
 }
