@@ -17,7 +17,7 @@ void removeProgramNonTerminalFromFollow();
 void findFollowSet();
 PNODE** create_predictive_table();
 void push_rule_to_table(NODE* rule_head, FIRST* first_tokens, PNODE** predictive_table);
-void parse_grammar_rule_for_table(NODE* rule_head, NODE** predictive_table);
+void parse_grammar_rule_for_table(NODE* rule_head, PNODE** predictive_table);
 void push_syn_for_nt(PNODE** predictive_table, FIRST * cur_first_follow, nonterminal cur_nt);
 void populate_predictive_table_syn_tokens(PNODE** predictive_table);
 void populate_predictive_table_error_tokens(PNODE ** predictive_table);

@@ -42,7 +42,7 @@ int hash_lexeme(char *lexeme) {
     unsigned long hash = 5381;
     int c;
 
-    while (c = *lexeme++)
+    while ((c = *lexeme++))
         hash = ((hash << 5) + hash) + c; 
 
     return hash % TABLE_SIZE;
