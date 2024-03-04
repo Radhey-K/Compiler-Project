@@ -4,7 +4,7 @@ CC = gcc
 SRCS = driver.c lexer.c symbol_table.c parser.c parsetree.c stack.c
 
 # Define the target executable
-TARGET = lexer
+TARGET = compiler
 
 # Rule to build the target executable
 $(TARGET): $(SRCS)

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include "lexer.h"
 #include "lexerDef.h"
 #include "symbol_table.h"
@@ -6,16 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-
-// --------**GLOBAL VARIABLES**--------
-// int state = 0;
-// int lexemeBegin,forwardPtr;
-// int tokenSize=0;
-// int lineNo=1;
-
-// char buffer[2 * BUFFER_SIZE];
-// FILE *filePointer;
-// --------**GLOBAL VARIABLES**--------
+#include <time.h>
 
 int main(void) {
     while(1) {
@@ -34,12 +27,14 @@ int main(void) {
             break;
         }
         else if (option == 1) {
+            // remove comments
             char *filename = malloc(100 * sizeof(char));
             printf("Enter the filename: ");
             scanf("%s", filename);
             removeComments(filename);
         }
         else if (option == 2) {
+            // print token list
             char *filename = malloc(100 * sizeof(char));
             printf("Enter the filename: ");
             scanf("%s", filename);
@@ -55,7 +50,30 @@ int main(void) {
             printf("\n");
         }
         else if (option == 4) {
-            // print total time taken
+            // measure time
+            clock_t start_time, end_time;
+            double total_CPU_time, total_CPU_time_in_seconds;
+            start_time = clock();
+
+            char *filename = malloc(100 * sizeof(char));
+            printf("Enter the filename: ");
+            scanf("%s", filename);
+
+            int original_stdout = dup(fileno(stdout));
+            int devnull = open("/dev/null", O_WRONLY);
+
+            dup2(devnull, fileno(stdout));
+            lexer_main(filename);
+            parser_main(filename);
+            dup2(original_stdout, fileno(stdout));
+
+            end_time = clock();
+            total_CPU_time = (double) (end_time - start_time);
+            total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
+            printf("\033[0;32m");
+            printf("\nTotal CPU time: %f\n", total_CPU_time);
+            printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);
+            printf("\033[0m");
         }
         else {
             printf("Invalid option\n");

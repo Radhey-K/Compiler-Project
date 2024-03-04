@@ -15,7 +15,7 @@
 //-----*GLOBAL VARIABLES*-----
 int parse_state = 0;
 int parse_lexemeBegin,parse_forwardPtr;
-int parse_lineNo=1;
+int parse_lineNo = 1;
 char parse_buffer[2 * BUFFER_SIZE];
 FILE *parse_filePointer;
 int parse_sharedvar = 0;
@@ -1405,7 +1405,7 @@ void populate_predictive_table_error_tokens(PNODE ** predictive_table){
             }
         }
     }
-    printf("ERROR TOKENS : %d \n", count);
+    // printf("ERROR TOKENS : %d \n", count);
 }
 
 PNODE** generate_predictive_table(NODE * grammar_rules){
@@ -1813,10 +1813,24 @@ int getNonTerminal(char* token) {
 }
 
 void parser_main(char * filename){
-    parse_filePointer = fopen(filename, "r");
-    parse_populateBuffer(0);
+    parse_state = 0;
+    parse_lineNo = 1;
+    parse_filePointer = NULL;
+    parse_sharedvar = 0;
+    memset(parse_buffer, 0, 2 * BUFFER_SIZE);
     parse_lexemeBegin = 0;
     parse_forwardPtr = 0;
+
+    parse_filePointer = fopen(filename, "r");
+    if (parse_filePointer == NULL) {
+        printf("File not found\n");
+        return;
+    }
+    parse_populateBuffer(0);
+
+    char line[256];
+    char lhs[256];
+    int i = 0;
 
     FILE *fp = fopen("grammar_rules.txt", "r");
     if (fp == NULL)
@@ -1825,9 +1839,6 @@ void parser_main(char * filename){
         return;
     }
 
-    char line[256];
-    char lhs[256];
-    int i = 0;
     while (fscanf(fp, "%[^\n]\n", line) != EOF)
     {
         char *token = strtok(line, " |");
