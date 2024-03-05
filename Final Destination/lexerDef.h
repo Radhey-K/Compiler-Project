@@ -1,5 +1,17 @@
+/* ---------Group Information---------
+Group Number: 15
+
+Yash Mundada: 2021A7PS0001P
+Aaryan Garg: 2021A7PS2222P
+Dev Kulkarni: 2021A7PS2430P
+Radhey Kanade: 2021A7PS2534P
+Shardul Shingare: 2021A7PS2539P
+Shantanu Ambekar: 2021A7PS2540P
+--------------------------------------*/
+
 #ifndef LEXERDEF_H
 #define LEXERDEF_H
+#include <stdio.h>
 
 #define MAX_VAR_ID_SIZE 20
 #define MAX_FUN_ID_SIZE 30
@@ -144,5 +156,11 @@ typedef struct{
     };
     int is_terminal;
 } symbol;
+
+typedef struct {
+    int state, lexemeBegin, forwardPtr, lineNo, sharedVar;
+    char buffer[2 * BUFFER_SIZE];
+    FILE *filePointer;
+} stateInfo;
 
 #endif

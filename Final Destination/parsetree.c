@@ -1,3 +1,14 @@
+/* ---------Group Information---------
+Group Number: 15
+
+Yash Mundada: 2021A7PS0001P
+Aaryan Garg: 2021A7PS2222P
+Dev Kulkarni: 2021A7PS2430P
+Radhey Kanade: 2021A7PS2534P
+Shardul Shingare: 2021A7PS2539P
+Shantanu Ambekar: 2021A7PS2540P
+--------------------------------------*/
+
 #include "parsetree.h"
 #include <stdio.h>
 
@@ -161,10 +172,10 @@ void print_inorder(Node *node)
 {
     if (node != NULL)
     {
-        if (node->num_children > 0)
-        {
-            print_inorder(node->children[0]);
-        }
+        // if (node->num_children > 0)
+        // {
+        //     print_inorder(node->children[0]);
+        // }
         if (node->data.is_terminal)
         {
             printf("Terminal: %s\n", tokenToString(node->data.t));
@@ -173,7 +184,7 @@ void print_inorder(Node *node)
         {
             printf("Non-terminal: %s\n", nonterminaltoString(node->data.nt));
         }
-        for (size_t i = 1; i < node->num_children; i++)
+        for (int i = 0; i < node->num_children; i++)
         {
             print_inorder(node->children[i]);
         }

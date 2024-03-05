@@ -1,8 +1,14 @@
-// Implement st_element struct
-// Create a st_table of type st_elements
-// element struct --> string(lexeme) + tkName --> enum value??
-// dont need a is_present bool --> it'll just be null (insert can be based on wether the pointer is null or not)
 
+/* ---------Group Information---------
+Group Number: 15
+
+Yash Mundada: 2021A7PS0001P
+Aaryan Garg: 2021A7PS2222P
+Dev Kulkarni: 2021A7PS2430P
+Radhey Kanade: 2021A7PS2534P
+Shardul Shingare: 2021A7PS2539P
+Shantanu Ambekar: 2021A7PS2540P
+--------------------------------------*/
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
@@ -38,7 +44,5 @@ void table_insert(ST stable, char *lexeme, tokName tk_type);
 ST_ELEMENT table_lookup(ST stable, char *lexeme);
 
 void populate_symbol_table(ST stable);
-
-TOKEN tokenizer(ST stable);
 
 #endif

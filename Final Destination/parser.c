@@ -1,3 +1,14 @@
+/* ---------Group Information---------
+Group Number: 15
+
+Yash Mundada: 2021A7PS0001P
+Aaryan Garg: 2021A7PS2222P
+Dev Kulkarni: 2021A7PS2430P
+Radhey Kanade: 2021A7PS2534P
+Shardul Shingare: 2021A7PS2539P
+Shantanu Ambekar: 2021A7PS2540P
+--------------------------------------*/
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,939 +23,12 @@
 #include "parserDef.h"
 #include "parser.h"
 
-//-----*GLOBAL VARIABLES*-----
-int parse_state = 0;
-int parse_lexemeBegin,parse_forwardPtr;
-int parse_lineNo = 1;
-char parse_buffer[2 * BUFFER_SIZE];
-FILE *parse_filePointer;
-int parse_sharedvar = 0;
-//-----*GLOBAL VARIABLES*-----
-
-//-----*HELPER FUNCTIONS*-----
-int parse_isDigit(char c){
-    return isdigit(c);
-}
-
-int parse_isLetter(char c){
-    return isalpha(c) != 0;
-}
-
-int parse_isNumber(char c){
-    return isalnum(c) != 0;
-}
-
-int parse_isLowercase(char c){
-    return islower(c) != 0;
-}
-
-int parse_digit_2to7(char c){
-    int num = c - '0';
-    if(num >= 2 && num <= 7)return 1;
-    else return 0;
-}
-//-----*HELPER FUNCTIONS*-----
-
-const char* parse_tokenToString(tokName token) {
-    switch(token) {
-        case TK_ASSIGNOP: return "TK_ASSIGNOP";
-        case TK_COMMENT: return "TK_COMMENT";
-        case TK_FIELDID: return "TK_FIELDID";
-        case TK_ID: return "TK_ID";
-        case TK_NUM: return "TK_NUM";
-        case TK_RNUM: return "TK_RNUM";
-        case TK_FUNID: return "TK_FUNID";
-        case TK_RUID: return "TK_RUID";
-        case TK_WITH: return "TK_WITH";
-        case TK_PARAMETERS: return "TK_PARAMETERS";
-        case TK_END: return "TK_END";
-        case TK_WHILE: return "TK_WHILE";
-        case TK_UNION: return "TK_UNION";
-        case TK_ENDUNION: return "TK_ENDUNION";
-        case TK_DEFINETYPE: return "TK_DEFINETYPE";
-        case TK_AS: return "TK_AS";
-        case TK_TYPE: return "TK_TYPE";
-        case TK_MAIN: return "TK_MAIN";
-        case TK_GLOBAL: return "TK_GLOBAL";
-        case TK_PARAMETER: return "TK_PARAMETER";
-        case TK_LIST: return "TK_LIST";
-        case TK_SQL: return "TK_SQL";
-        case TK_SQR: return "TK_SQR";
-        case TK_INPUT: return "TK_INPUT";
-        case TK_OUTPUT: return "TK_OUTPUT";
-        case TK_INT: return "TK_INT";
-        case TK_REAL: return "TK_REAL";
-        case TK_COMMA: return "TK_COMMA";
-        case TK_SEM: return "TK_SEM";
-        case TK_COLON: return "TK_COLON";
-        case TK_DOT: return "TK_DOT";
-        case TK_ENDWHILE: return "TK_ENDWHILE";
-        case TK_OP: return "TK_OP";
-        case TK_CL: return "TK_CL";
-        case TK_IF: return "TK_IF";
-        case TK_THEN: return "TK_THEN";
-        case TK_ENDIF: return "TK_ENDIF";
-        case TK_READ: return "TK_READ";
-        case TK_WRITE: return "TK_WRITE";
-        case TK_RETURN: return "TK_RETURN";
-        case TK_PLUS: return "TK_PLUS";
-        case TK_MINUS: return "TK_MINUS";
-        case TK_MUL: return "TK_MUL";
-        case TK_DIV: return "TK_DIV";
-        case TK_CALL: return "TK_CALL";
-        case TK_RECORD: return "TK_RECORD";
-        case TK_ENDRECORD: return "TK_ENDRECORD";
-        case TK_ELSE: return "TK_ELSE";
-        case TK_AND: return "TK_AND";
-        case TK_OR: return "TK_OR";
-        case TK_NOT: return "TK_NOT";
-        case TK_LT: return "TK_LT";
-        case TK_LE: return "TK_LE";
-        case TK_EQ: return "TK_EQ";
-        case TK_GT: return "TK_GT";
-        case TK_GE: return "TK_GE";
-        case TK_NE: return "TK_NE";
-        case TK_EOF: return "TK_EOF";
-        case TK_ERROR: return "TK_ERROR";
-        case TK_EPS: return "TK_EPS";
-        default: return "Unknown Token";
-    }
-}
-
-const char* parse_nonterminaltoString(nonterminal nt) {
-    switch(nt) {
-        case program: return "<program>";
-        case otherFunctions: return "<otherFunctions>";
-        case mainFunction: return "<mainFunction>";
-        case stmts: return "<stmts>";
-        case function: return "<function>";
-        case input_par: return "<input_par>";
-        case output_par: return "<output_par>";
-        case parameter_list: return "<parameter_list>";
-        case dataType: return "<dataType>";
-        case primitiveDatatype: return "<primitiveDatatype>";
-        case constructedDatatype: return "<constructedDatatype>";
-        case remaining_list: return "<remaining_list>";
-        case typeDefinitions: return "<typeDefinitions>";
-        case actualOrRedefined: return "<actualOrRedefined>";
-        case typeDefinition: return "<typeDefinition>";
-        case fieldDefinitions: return "<fieldDefinitions>";
-        case fieldDefinition: return "<fieldDefinition>";
-        case fieldType: return "<fieldType>";
-        case moreFields: return "<moreFields>";
-        case declarations: return "<declarations>";
-        case declaration: return "<declaration>";
-        case global_or_not: return "<global_or_not>";
-        case otherStmts: return "<otherStmts>";
-        case stmt: return "<stmt>";
-        case assignmentStmt: return "<assignmentStmt>";
-        case SingleOrRecId: return "<SingleOrRecId>";
-        case option_single_constructed: return "<option_single_constructed>";
-        case oneExpansion: return "<oneExpansion>";
-        case moreExpansions: return "<moreExpansions>";
-        case funCallStmt: return "<funCallStmt>";
-        case outputParameters: return "<outputParameters>";
-        case inputParameters: return "<inputParameters>";
-        case iterativeStmt: return "<iterativeStmt>";
-        case conditionalStmt: return "<conditionalStmt>";
-        case elsePart: return "<elsePart>";
-        case ioStmt: return "<ioStmt>";
-        case arithmeticExpression: return "<arithmeticExpression>";
-        case expPrime: return "<expPrime>";
-        case term: return "<term>";
-        case termPrime: return "<termPrime>";
-        case factor: return "<factor>";
-        case highPrecedenceOperator: return "<highPrecedenceOperator>";
-        case lowPrecedenceOperators: return "<lowPrecedenceOperators>";
-        case booleanExpression: return "<booleanExpression>";
-        case var: return "<var>";
-        case logicalOp: return "<logicalOp>";
-        case relationalOp: return "<relationalOp>";
-        case returnStmt: return "<returnStmt>";
-        case optionalReturn: return "<optionalReturn>";
-        case idList: return "<idList>";
-        case more_ids: return "<more_ids>";
-        case definetypestmt: return "<definetypestmt>";
-        case A: return "<A>";
-        default: return "Unknown";
-    }
-}
-
-void parse_populateBuffer(int whichBuffer){
-    if (whichBuffer == 0 && parse_sharedvar == 0){
-        memset(parse_buffer, 0, BUFFER_SIZE);
-        fread(parse_buffer, BUFFER_SIZE, 1, parse_filePointer);
-        parse_sharedvar = 1;
-    }
-    else if (whichBuffer == 1 && parse_sharedvar == 1){
-        memset(parse_buffer + BUFFER_SIZE, 0, BUFFER_SIZE);
-        fread(parse_buffer + BUFFER_SIZE, BUFFER_SIZE, 1, parse_filePointer);
-        parse_sharedvar = 0;
-    }
-}
-
-char parse_getCharacter(){
-    if (parse_forwardPtr == BUFFER_SIZE){
-        parse_populateBuffer(1);
-    }
-    else if (parse_forwardPtr == 2 * BUFFER_SIZE){
-        parse_populateBuffer(0);
-        parse_forwardPtr = 0;
-    }
-
-    char c = parse_buffer[parse_forwardPtr];
-    if (c == '\0'){
-        parse_forwardPtr++;
-        return EOF;
-    }
-    
-    parse_forwardPtr++;
-    return c;
-}
-
-void parse_retract(int noOfRetractions){
-    parse_forwardPtr -= noOfRetractions;
-    if(parse_forwardPtr < 0){
-        parse_forwardPtr += (2*BUFFER_SIZE);
-    }
-}
-
-char *parse_tokenFromPtrs(){
-    int bufferSize = BUFFER_SIZE * 2;
-    int length1, length2;
-    if (parse_forwardPtr < parse_lexemeBegin){
-        length1 = bufferSize - parse_lexemeBegin;
-        length2 = parse_forwardPtr;
-    }
-    else{
-        length1 = parse_forwardPtr - parse_lexemeBegin;
-        length2 = 0;
-    }
-
-    char *finalToken = (char *)malloc((length1 + length2 + 1) * sizeof(char));
-    strncpy(finalToken, parse_buffer + parse_lexemeBegin, length1);
-    finalToken[length1] = '\0';
-    if (length2 > 0){
-        strncat(finalToken, parse_buffer, length2);
-    }
-    parse_lexemeBegin=parse_forwardPtr;
-    return finalToken;
-}
-
-int parse_lexeme_length(){
-    int bufferSize = BUFFER_SIZE * 2;
-    int length1, length2;
-    if (parse_forwardPtr < parse_lexemeBegin){
-        length1 = bufferSize - parse_lexemeBegin;
-        length2 = parse_forwardPtr;
-    }
-    else{
-        length1 = parse_forwardPtr - parse_lexemeBegin;
-        length2 = 0;
-    }
-    return length1+length2;
-}
-
-TOKEN parse_tokenizer(ST stable){
-    char character;
-    TOKEN token;
-    token.integer = -1;
-    token.realNum = -1;
-    token.string = (char*)malloc(sizeof(char) * 50);
-    ST_ELEMENT ele;
-
-    while (true){
-        switch(parse_state){
-            case 0:
-                character=parse_getCharacter();
-
-                if (0){}
-                else if (character == ' ')
-                    parse_state = 58;
-                else if (parse_isDigit(character))
-                    parse_state = 1;
-                else if (character == 'b' || character == 'c' || character == 'd')
-                    parse_state = 12;
-                else if (parse_isLowercase(character) && character != 'b' && character != 'c' && character != 'd')
-                    parse_state = 16;
-                else if (character == '<')
-                    parse_state = 25;
-                else if (character == '=')
-                    parse_state = 32;
-                else if (character == '>')
-                    parse_state = 34;
-                else if (character == '!')
-                    parse_state = 37;
-                else if (character == '@')
-                    parse_state = 39;
-                else if (character == '&')
-                    parse_state = 42;
-                else if (character == '_')
-                    parse_state = 18;
-                else if (character == '#')
-                    parse_state = 22;
-                else if (character == '[')
-                    parse_state = 45;
-                else if (character == ']')
-                    parse_state = 46;
-                else if (character == ',')
-                    parse_state = 47;
-                else if (character == ';')
-                    parse_state = 48;
-                else if (character == ':')
-                    parse_state = 49;
-                else if (character == '.')
-                    parse_state = 50;
-                else if (character == '(')
-                    parse_state = 51;
-                else if (character == ')')
-                    parse_state = 52;
-                else if (character == '+')
-                    parse_state = 53;
-                else if (character == '-')
-                    parse_state = 54;
-                else if (character == '*')
-                    parse_state = 55;
-                else if (character == '/')
-                    parse_state = 56;
-                else if (character == '~')
-                    parse_state = 57;
-                else if (character == '%')
-                    parse_state = 60;
-                else if (character == '\n')
-                    parse_state = 61;
-                else if (character == EOF){
-                    token.name = TK_EOF;
-                    return token;
-                }
-                else if (character == '\r')
-                    parse_state = 0;
-                else if (character == '\t'){
-                    parse_lexemeBegin = parse_forwardPtr;
-                    parse_state = 0;
-                }
-                else
-                    parse_state = 62;
-                break;
-
-            case 1:
-                character = parse_getCharacter();
-                if (character == '.')
-                    parse_state = 2;
-                else if (parse_isDigit(character))
-                    parse_state = 1;
-                else
-                    parse_state = 9;
-                break;
-
-            case 2:
-                character = parse_getCharacter();
-                if (parse_isDigit(character))
-                    parse_state = 3;
-                else
-                    parse_state = 10;
-                break;
-
-            case 3:
-                character = parse_getCharacter();
-                if (parse_isDigit(character))
-                    parse_state = 4;
-                else
-                    parse_state = 59;
-                break;
-
-            case 4:
-                character = parse_getCharacter();
-                if (character == 'E')
-                    parse_state = 5;
-                else
-                    parse_state = 11;
-                break;
-
-            case 5:
-                character = parse_getCharacter();
-                if (character == '+' || character == '-')
-                    parse_state = 6;
-                else if (parse_isDigit(character))
-                    parse_state = 7;
-                else
-                    parse_state = 59;
-                break;
-
-            case 6:
-                character = parse_getCharacter();
-                if (parse_isDigit(character))
-                    parse_state = 7;
-                else
-                    parse_state = 59;
-                break;
-
-            case 7:
-                character = parse_getCharacter();
-                if (parse_isDigit(character))
-                    parse_state = 8;
-                else
-                    parse_state = 59;
-                break;
-
-            case 8:
-                token.name = TK_RNUM;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 9:
-                parse_retract(1);
-                token.name = TK_NUM;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.integer = atoi(token.string);
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 10:
-                parse_retract(2);
-                token.name = TK_NUM;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.integer = atoi(token.string);
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 11:
-                parse_retract(1);
-                token.name = TK_RNUM;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.realNum = atof(token.string);
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 12:
-                character = parse_getCharacter();
-                if (parse_digit_2to7(character))
-                    parse_state = 13;
-                else if (parse_isLowercase(character))
-                    parse_state = 16;
-                else
-                    parse_state = 17;
-                break;
-
-            case 13:
-                character = parse_getCharacter();
-                if (character == 'b' || character == 'c' || character == 'd')
-                    parse_state = 13;
-                else if (parse_digit_2to7(character))
-                    parse_state = 14;
-                else
-                    parse_state = 15;
-                break;
-
-            case 14:
-                character = parse_getCharacter();
-                if (parse_digit_2to7(character))
-                    parse_state = 14;
-                else
-                    parse_state = 15;
-                break;
-
-            case 15:
-                parse_retract(1);
-                if (parse_lexeme_length() > MAX_VAR_ID_SIZE){
-                    parse_state = 64;
-                    break;
-                }
-                token.name = TK_ID;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                ele = table_lookup(stable, token.string);
-                if (ele == NULL){
-                    table_insert(stable, token.string, token.name);
-                }
-                return token;
-                break;
-
-            case 16:
-                character = parse_getCharacter();
-                if (parse_isLowercase(character))
-                    parse_state = 16;
-                else
-                    parse_state = 17;
-                break;
-
-            case 17:
-                parse_retract(1);
-                token.name = TK_FIELDID;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                ele = table_lookup(stable, token.string);
-                if (ele == NULL){
-                    table_insert(stable, token.string, token.name);
-                }
-                else{
-                    token.name = ele->tk_type;
-                }
-                return token;
-                break;
-
-            case 18:
-                character = parse_getCharacter();
-                if (parse_isLetter(character))
-                    parse_state = 19;
-                else
-                    parse_state = 59;
-                break;
-
-            case 19:
-                character = parse_getCharacter();
-                if (parse_isLetter(character))
-                    parse_state = 19;
-                else if (parse_isNumber(character))
-                    parse_state = 20;
-                else
-                    parse_state = 21;
-                break;
-
-            case 20:
-                character = parse_getCharacter();
-                if (parse_isNumber(character))
-                    parse_state = 20;
-                else
-                    parse_state = 21;
-                break;
-
-            case 21:
-                parse_retract(1);
-                if (parse_lexeme_length() > MAX_FUN_ID_SIZE){
-                    parse_state = 59;
-                    break;
-                }
-                token.name = TK_FUNID;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                ele = table_lookup(stable, token.string);
-                if (ele == NULL){
-                    table_insert(stable, token.string, token.name);
-                }
-                else{
-                    token.name = ele->tk_type;
-                }
-                return token;
-                break;
-
-            case 22:
-                character = parse_getCharacter();
-                if (parse_isLowercase(character))
-                    parse_state = 23;
-                else
-                    parse_state = 59;
-                break;
-
-            case 23:
-                character = parse_getCharacter();
-                if (parse_isLowercase(character))
-                    parse_state = 23;
-                else
-                    parse_state = 24;
-                break;
-
-            case 24:
-                parse_retract(1);
-                token.name = TK_RUID;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                ele = table_lookup(stable, token.string);
-                if (ele == NULL){
-                    table_insert(stable, token.string, token.name);
-                }
-                return token;
-                break;
-
-            case 25:
-                character = parse_getCharacter();
-                if (character == '-')
-                    parse_state = 26;
-                else if (character == '=')
-                    parse_state = 31;
-                else
-                    parse_state = 29;
-                break;
-
-            case 26:
-                character = parse_getCharacter();
-                if (character == '-')
-                    parse_state = 27;
-                else
-                    parse_state = 30;
-                break;
-
-            case 27:
-                character = parse_getCharacter();
-                if (character == '-')
-                    parse_state = 28;
-                else
-                    parse_state = 59;
-                break;
-
-            case 28:
-                token.name = TK_ASSIGNOP;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 29:
-                parse_retract(1);
-                token.name = TK_LT;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 30:
-                parse_retract(2);
-                token.name = TK_LT;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 31:
-                token.name = TK_LE;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 32:
-                character = parse_getCharacter();
-                if (character == '=')
-                    parse_state = 33;
-                else
-                    parse_state = 59;
-                break;
-
-            case 33:
-                token.name = TK_EQ;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 34:
-                character = parse_getCharacter();
-                if (character == '=')
-                    parse_state = 35;
-                else
-                    parse_state = 36;
-                break;
-
-            case 35:
-                token.name = TK_GE;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 36:
-                parse_retract(1);
-                token.name = TK_GT;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 37:
-                character = parse_getCharacter();
-                if (character == '=')
-                    parse_state = 38;
-                else
-                    parse_state = 59;
-                break;
-
-            case 38:
-                token.name = TK_NE;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 39:
-                character = parse_getCharacter();
-                if (character == '@')
-                    parse_state = 40;
-                else
-                    parse_state = 59;
-                break;
-
-            case 40:
-                character = parse_getCharacter();
-                if (character == '@')
-                    parse_state = 41;
-                else
-                    parse_state = 59;
-                break;
-
-            case 41:
-                token.name = TK_OR;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 42:
-                character = parse_getCharacter();
-                if (character == '&')
-                    parse_state = 43;
-                else
-                    parse_state = 59;
-                break;
-
-            case 43:
-                character = parse_getCharacter();
-                if (character == '&')
-                    parse_state = 44;
-                else
-                    parse_state = 59;
-                break;
-
-            case 44:
-                token.name = TK_AND;
-                strcpy(token.string, parse_tokenFromPtrs());
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 45:
-                token.name = TK_SQL;
-                strcpy(token.string, "[");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 46:
-                token.name = TK_SQR;
-                strcpy(token.string, "]");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 47:
-                token.name = TK_COMMA;
-                strcpy(token.string, ",");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 48:
-                token.name = TK_SEM;
-                strcpy(token.string, ";");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 49:
-                token.name = TK_COLON;
-                strcpy(token.string, ":");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 50:
-                token.name = TK_DOT;
-                strcpy(token.string, ".");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 51:
-                token.name = TK_OP;
-                strcpy(token.string, "(");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 52:
-                token.name = TK_CL;
-                strcpy(token.string, ")");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 53:
-                token.name = TK_PLUS;
-                strcpy(token.string, "+");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 54:
-                token.name = TK_MINUS;
-                strcpy(token.string, "-");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 55:
-                token.name = TK_MUL;
-                strcpy(token.string, "*");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 56:
-                token.name = TK_DIV;
-                strcpy(token.string, "/");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 57:
-                token.name = TK_NOT;
-                strcpy(token.string, "~");
-                token.lineNo = parse_lineNo;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 58:
-                parse_lexemeBegin = parse_forwardPtr;
-                parse_state = 0;
-                break;
-
-            case 59:
-                parse_retract(1);
-                token.name = TK_ERROR;
-                token.lineNo = parse_lineNo;
-                strcpy(token.string, "pattern");
-                strcat(token.string, parse_tokenFromPtrs());
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-            
-            case 60:
-                character = parse_getCharacter();
-                if (character == '\n'){
-                    parse_state = 63;
-                }
-                else if (character == EOF){
-                    token.name = TK_EOF;
-                    token.lineNo = parse_lineNo;
-                    return token;
-                }
-                else
-                    parse_state = 60;
-                break;
-
-            case 61:
-                parse_lineNo++;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                break;
-
-            case 62:
-                token.name = TK_ERROR;
-                token.lineNo = parse_lineNo;
-                strcpy(token.string, "symbol");
-                strcat(token.string, parse_tokenFromPtrs());
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 63:
-                token.name = TK_COMMENT;
-                strcpy(token.string, "%");
-                token.lineNo = parse_lineNo;
-                parse_lineNo++;
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;
-
-            case 64:
-                token.name = TK_ERROR;
-                token.lineNo = parse_lineNo;
-                strcpy(token.string, "size");
-                strcat(token.string, parse_tokenFromPtrs());
-                parse_state = 0;
-                parse_lexemeBegin = parse_forwardPtr;
-                return token;
-                break;    
-        }
-    }
-}
-
 // Definitions
 NODE rules[NUM_RULES];
 FIRST* FIRST_T[NUM_TOKENS];
 FIRST* FIRST_NT[NUM_NON_TERMINALS];
 FIRST* FOLLOW_NT[NUM_NON_TERMINALS];
 FIRST* FOLLOW_T[NUM_TOKENS];
-
 
 int symEqual(symbol s1, symbol s2){
     if(s1.is_terminal != s2.is_terminal)return 0;
@@ -1425,9 +509,9 @@ PNODE** generate_predictive_table(NODE * grammar_rules){
 void print_list(NODE* root){
     while(root != NULL) {
         if(root->sym.is_terminal == 1){
-            printf("%s ", parse_tokenToString(root->sym.t));
+            printf("%s ", tokenToString(root->sym.t));
         }else{
-            printf("%s ", parse_nonterminaltoString(root->sym.nt));
+            printf("%s ", nonterminaltoString(root->sym.nt));
         }
         root = root->next;
     }
@@ -1813,29 +897,36 @@ int getNonTerminal(char* token) {
 }
 
 void parser_main(char * filename){
-    parse_state = 0;
-    parse_lineNo = 1;
-    parse_filePointer = NULL;
-    parse_sharedvar = 0;
-    memset(parse_buffer, 0, 2 * BUFFER_SIZE);
-    parse_lexemeBegin = 0;
-    parse_forwardPtr = 0;
+    // parse_state = 0;
+    // parse_lineNo = 1;
+    // parse_filePointer = NULL;
+    // parse_sharedvar = 0;
+    // memset(parse_buffer, 0, 2 * BUFFER_SIZE);
+    // parse_lexemeBegin = 0;
+    // parse_forwardPtr = 0;
+    stateInfo *s = (stateInfo *)malloc(sizeof(stateInfo));
+    initialize(s);
 
-    parse_filePointer = fopen(filename, "r");
-    if (parse_filePointer == NULL) {
-        printf("File not found\n");
+    s->filePointer = fopen(filename, "r");
+    if (s->filePointer == NULL) {
+        printf("\033[0;31m");
+        printf("Error: Source file not found\n");
+        printf("\033[0m");
         return;
     }
-    parse_populateBuffer(0);
+
+    populateBuffer(0, s);
 
     char line[256];
     char lhs[256];
     int i = 0;
 
-    FILE *fp = fopen("grammar_rules.txt", "r");
+    FILE *fp = fopen("grammar.txt", "r");
     if (fp == NULL)
     {
+        printf("\033[0;31m");
         printf("Error: File not found\n");
+        printf("\033[0m");
         return;
     }
 
@@ -1873,7 +964,7 @@ void parser_main(char * filename){
         }
         i++;
     }
-    printf("Grammar rules parser \n");
+    printf("Grammar rules parser\n");
 
     // computes first set for tokens
     for(int i=0; i<NUM_TOKENS; i++){
@@ -1912,28 +1003,34 @@ void parser_main(char * filename){
     ST stable = create_symbol_table();
     populate_symbol_table(stable);
 
-    while(parse_buffer[parse_forwardPtr] != EOF){
+    while(s->buffer[s->forwardPtr] != EOF){
         if(call_token){
-            curr = parse_tokenizer(stable);
+            curr = tokenizer(stable, s);
         }
         if(curr.name == TK_EOF) {
             break;
         }else if (strstr(curr.string, "pattern") != NULL) {
             char *substring = strstr(curr.string, "pattern");
             substring += strlen("pattern");
+            printf("\033[0;31m");
             printf("Line no.%3d: Error : Unknown pattern <%s>\n", curr.lineNo, substring);
+            printf("\033[0;m");
             call_token = 1;
         }
         else if (strstr(curr.string, "size") != NULL) {
             char *substring = strstr(curr.string, "size");
             substring += strlen("size");
+            printf("\033[0;31m");
             printf("Line no.%3d: Error : Variable Identifier is longer than the prescribed length of 20 characters.\n", curr.lineNo);
+            printf("\033[0;m");
             call_token = 1;
         }
         else if (strstr(curr.string, "symbol") != NULL) {
             char *substring = strstr(curr.string, "symbol");
             substring += strlen("symbol");
+            printf("\033[0;31m");
             printf("Line no.%3d: Error : Unknown symbol <%s>\n", curr.lineNo, substring);
+            printf("\033[0;m");
             call_token = 1;
         }
         else{
@@ -1953,7 +1050,9 @@ void parser_main(char * filename){
                 continue;
             }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==1){
                 // SYN
-                printf("Line no.%3d: (SYN) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, parse_tokenToString(curr.name), curr.string, parse_nonterminaltoString(sym.nt));
+                printf("\033[0;31m");
+                printf("Line no.%3d: (SYN) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, tokenToString(curr.name), curr.string, nonterminaltoString(sym.nt));
+                printf("\033[0;m");
                 pop(&stack);
                 push_list(NULL, &stack, cur_top->treeNode, 1);
                 free(cur_top);
@@ -1961,7 +1060,9 @@ void parser_main(char * filename){
                 continue;
             }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_error==1){
                 // ERROR
-                printf("Line no.%3d: (ERROR) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, parse_tokenToString(curr.name), curr.string, parse_nonterminaltoString(sym.nt));
+                printf("\033[0;31m");
+                printf("Line no.%3d: (ERROR) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, tokenToString(curr.name), curr.string, nonterminaltoString(sym.nt));
+                printf("\033[0;m");
                 call_token=1;
                 continue;
             }else if(sym.is_terminal==1){
@@ -1971,7 +1072,9 @@ void parser_main(char * filename){
                     call_token=1;
                     continue;
                 }else{
-                    printf("Line no.%3d: (TERMINAL NON MATCH) The token %s for lexeme %s does not match with expected token %s \n",curr.lineNo, parse_tokenToString(curr.name), curr.string, parse_tokenToString(sym.t));
+                    printf("\033[0;31m");
+                    printf("Line no.%3d: (TERMINAL NON MATCH) The token %s for lexeme %s does not match with expected token %s \n",curr.lineNo, tokenToString(curr.name), curr.string, tokenToString(sym.t));
+                    printf("\033[0;m");
                     pop(&stack);
                     free(cur_top);
                     call_token = 0;

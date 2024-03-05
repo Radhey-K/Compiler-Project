@@ -1,0 +1,5 @@
+_main	
+	type int:d5cb34567:global;
+	b5c<---d5cb34567+1;
+	return;
+end

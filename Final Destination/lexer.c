@@ -1,3 +1,14 @@
+/* ---------Group Information---------
+Group Number: 15
+
+Yash Mundada: 2021A7PS0001P
+Aaryan Garg: 2021A7PS2222P
+Dev Kulkarni: 2021A7PS2430P
+Radhey Kanade: 2021A7PS2534P
+Shardul Shingare: 2021A7PS2539P
+Shantanu Ambekar: 2021A7PS2540P
+--------------------------------------*/
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,10 +22,10 @@
 //-----*GLOBAL VARIABLES*-----
 int state = 0;
 int lexemeBegin,forwardPtr;
-int lineNo=1;
+int lineNo = 1;
 char buffer[2 * BUFFER_SIZE];
 FILE *filePointer;
-int sharedvar = 0;
+int sharedVar = 0;
 //-----*GLOBAL VARIABLES*-----
 
 //-----*HELPER FUNCTIONS*-----
@@ -166,82 +177,82 @@ const char* nonterminaltoString(nonterminal nt) {
     }
 }
 
-void populateBuffer(int whichBuffer){
-    if (whichBuffer == 0 && sharedvar == 0){
-        memset(buffer, 0, BUFFER_SIZE);
-        fread(buffer, BUFFER_SIZE, 1, filePointer);
-        sharedvar = 1;
+void populateBuffer(int whichBuffer, stateInfo *s){
+    if (whichBuffer == 0 && s->sharedVar == 0) {
+        memset(s->buffer, 0, BUFFER_SIZE);
+        fread(s->buffer, BUFFER_SIZE, 1, s->filePointer);
+        s->sharedVar = 1;
     }
-    else if (whichBuffer == 1 && sharedvar == 1){
-        memset(buffer + BUFFER_SIZE, 0, BUFFER_SIZE);
-        fread(buffer + BUFFER_SIZE, BUFFER_SIZE, 1, filePointer);
-        sharedvar = 0;
+    else if (whichBuffer == 1 && s->sharedVar == 1) {
+        memset(s->buffer + BUFFER_SIZE, 0, BUFFER_SIZE);
+        fread(s->buffer + BUFFER_SIZE, BUFFER_SIZE, 1, s->filePointer);
+        s->sharedVar = 0;
     }
 }
 
-char getCharacter(){
-    if (forwardPtr == BUFFER_SIZE){
-        populateBuffer(1);
+char getCharacter(stateInfo *s){
+    if (s->forwardPtr == BUFFER_SIZE){
+        populateBuffer(1, s);
     }
-    else if (forwardPtr == 2 * BUFFER_SIZE){
-        populateBuffer(0);
-        forwardPtr = 0;
+    else if (s->forwardPtr == 2 * BUFFER_SIZE){
+        populateBuffer(0, s);
+        s->forwardPtr = 0;
     }
 
-    char c = buffer[forwardPtr];
+    char c = s->buffer[s->forwardPtr];
     if (c == '\0'){
-        forwardPtr++;
+        s->forwardPtr++;
         return EOF;
     }
     
-    forwardPtr++;
+    s->forwardPtr++;
     return c;
 }
 
-void retract(int noOfRetractions){
-    forwardPtr -= noOfRetractions;
-    if(forwardPtr < 0){
-        forwardPtr += (2*BUFFER_SIZE);
+void retract(int noOfRetractions, stateInfo *s) {
+    s->forwardPtr -= noOfRetractions;
+    if(s->forwardPtr < 0){
+        s->forwardPtr += (2*BUFFER_SIZE);
     }
 }
 
-char *tokenFromPtrs(){
+char *tokenFromPtrs(stateInfo *s){
     int bufferSize = BUFFER_SIZE * 2;
     int length1, length2;
-    if (forwardPtr < lexemeBegin){
-        length1 = bufferSize - lexemeBegin;
-        length2 = forwardPtr;
+    if (s->forwardPtr < s->lexemeBegin){
+        length1 = bufferSize - s->lexemeBegin;
+        length2 = s->forwardPtr;
     }
     else{
-        length1 = forwardPtr - lexemeBegin;
+        length1 = s->forwardPtr - s->lexemeBegin;
         length2 = 0;
     }
 
     char *finalToken = (char *)malloc((length1 + length2 + 1) * sizeof(char));
-    strncpy(finalToken, buffer + lexemeBegin, length1);
+    strncpy(finalToken, s->buffer + s->lexemeBegin, length1);
     finalToken[length1] = '\0';
     if (length2 > 0){
-        strncat(finalToken, buffer, length2);
+        strncat(finalToken, s->buffer, length2);
     }
-    lexemeBegin=forwardPtr;
+    s->lexemeBegin=s->forwardPtr;
     return finalToken;
 }
 
-int lexeme_length(){
+int lexeme_length(stateInfo *s) {
     int bufferSize = BUFFER_SIZE * 2;
     int length1, length2;
-    if (forwardPtr < lexemeBegin){
-        length1 = bufferSize - lexemeBegin;
-        length2 = forwardPtr;
+    if (s->forwardPtr < s->lexemeBegin){
+        length1 = bufferSize - s->lexemeBegin;
+        length2 = s->forwardPtr;
     }
     else{
-        length1 = forwardPtr - lexemeBegin;
+        length1 = s->forwardPtr - s->lexemeBegin;
         length2 = 0;
     }
     return length1+length2;
 }
 
-TOKEN tokenizer(ST stable){
+TOKEN tokenizer(ST stable, stateInfo *s){
     char character;
     TOKEN token;
     token.integer = -1;
@@ -250,220 +261,220 @@ TOKEN tokenizer(ST stable){
     ST_ELEMENT ele;
 
     while (true){
-        switch(state){
+        switch(s->state){
             case 0:
-                character=getCharacter();
+                character=getCharacter(s);
 
                 if (0){}
                 else if (character == ' ')
-                    state = 58;
+                    s->state = 58;
                 else if (isDigit(character))
-                    state = 1;
+                    s->state = 1;
                 else if (character == 'b' || character == 'c' || character == 'd')
-                    state = 12;
+                    s->state = 12;
                 else if (isLowercase(character) && character != 'b' && character != 'c' && character != 'd')
-                    state = 16;
+                    s->state = 16;
                 else if (character == '<')
-                    state = 25;
+                    s->state = 25;
                 else if (character == '=')
-                    state = 32;
+                    s->state = 32;
                 else if (character == '>')
-                    state = 34;
+                    s->state = 34;
                 else if (character == '!')
-                    state = 37;
+                    s->state = 37;
                 else if (character == '@')
-                    state = 39;
+                    s->state = 39;
                 else if (character == '&')
-                    state = 42;
+                    s->state = 42;
                 else if (character == '_')
-                    state = 18;
+                    s->state = 18;
                 else if (character == '#')
-                    state = 22;
+                    s->state = 22;
                 else if (character == '[')
-                    state = 45;
+                    s->state = 45;
                 else if (character == ']')
-                    state = 46;
+                    s->state = 46;
                 else if (character == ',')
-                    state = 47;
+                    s->state = 47;
                 else if (character == ';')
-                    state = 48;
+                    s->state = 48;
                 else if (character == ':')
-                    state = 49;
+                    s->state = 49;
                 else if (character == '.')
-                    state = 50;
+                    s->state = 50;
                 else if (character == '(')
-                    state = 51;
+                    s->state = 51;
                 else if (character == ')')
-                    state = 52;
+                    s->state = 52;
                 else if (character == '+')
-                    state = 53;
+                    s->state = 53;
                 else if (character == '-')
-                    state = 54;
+                    s->state = 54;
                 else if (character == '*')
-                    state = 55;
+                    s->state = 55;
                 else if (character == '/')
-                    state = 56;
+                    s->state = 56;
                 else if (character == '~')
-                    state = 57;
+                    s->state = 57;
                 else if (character == '%')
-                    state = 60;
+                    s->state = 60;
                 else if (character == '\n')
-                    state = 61;
+                    s->state = 61;
                 else if (character == EOF){
                     token.name = TK_EOF;
                     return token;
                 }
                 else if (character == '\r')
-                    state = 0;
+                    s->state = 0;
                 else if (character == '\t'){
-                    lexemeBegin = forwardPtr;
-                    state = 0;
+                    s->lexemeBegin = s->forwardPtr;
+                    s->state = 0;
                 }
                 else
-                    state = 62;
+                    s->state = 62;
                 break;
 
             case 1:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '.')
-                    state = 2;
+                    s->state = 2;
                 else if (isDigit(character))
-                    state = 1;
+                    s->state = 1;
                 else
-                    state = 9;
+                    s->state = 9;
                 break;
 
             case 2:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isDigit(character))
-                    state = 3;
+                    s->state = 3;
                 else
-                    state = 10;
+                    s->state = 10;
                 break;
 
             case 3:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isDigit(character))
-                    state = 4;
+                    s->state = 4;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 4:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == 'E')
-                    state = 5;
+                    s->state = 5;
                 else
-                    state = 11;
+                    s->state = 11;
                 break;
 
             case 5:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '+' || character == '-')
-                    state = 6;
+                    s->state = 6;
                 else if (isDigit(character))
-                    state = 7;
+                    s->state = 7;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 6:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isDigit(character))
-                    state = 7;
+                    s->state = 7;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 7:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isDigit(character))
-                    state = 8;
+                    s->state = 8;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 8:
                 token.name = TK_RNUM;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 9:
-                retract(1);
+                retract(1, s);
                 token.name = TK_NUM;
-                strcpy(token.string, tokenFromPtrs());
+                strcpy(token.string, tokenFromPtrs(s));
                 token.integer = atoi(token.string);
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 10:
-                retract(2);
+                retract(2, s);
                 token.name = TK_NUM;
-                strcpy(token.string, tokenFromPtrs());
+                strcpy(token.string, tokenFromPtrs(s));
                 token.integer = atoi(token.string);
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 11:
-                retract(1);
+                retract(1, s);
                 token.name = TK_RNUM;
-                strcpy(token.string, tokenFromPtrs());
+                strcpy(token.string, tokenFromPtrs(s));
                 token.realNum = atof(token.string);
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 12:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (digit_2to7(character))
-                    state = 13;
+                    s->state = 13;
                 else if (isLowercase(character))
-                    state = 16;
+                    s->state = 16;
                 else
-                    state = 17;
+                    s->state = 17;
                 break;
 
             case 13:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == 'b' || character == 'c' || character == 'd')
-                    state = 13;
+                    s->state = 13;
                 else if (digit_2to7(character))
-                    state = 14;
+                    s->state = 14;
                 else
-                    state = 15;
+                    s->state = 15;
                 break;
 
             case 14:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (digit_2to7(character))
-                    state = 14;
+                    s->state = 14;
                 else
-                    state = 15;
+                    s->state = 15;
                 break;
 
             case 15:
-                retract(1);
-                if (lexeme_length() > MAX_VAR_ID_SIZE){
-                    state = 64;
+                retract(1, s);
+                if (lexeme_length(s) > MAX_VAR_ID_SIZE){
+                    s->state = 64;
                     break;
                 }
                 token.name = TK_ID;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 ele = table_lookup(stable, token.string);
                 if (ele == NULL){
                     table_insert(stable, token.string, token.name);
@@ -472,20 +483,20 @@ TOKEN tokenizer(ST stable){
                 break;
 
             case 16:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isLowercase(character))
-                    state = 16;
+                    s->state = 16;
                 else
-                    state = 17;
+                    s->state = 17;
                 break;
 
             case 17:
-                retract(1);
+                retract(1, s);
                 token.name = TK_FIELDID;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 ele = table_lookup(stable, token.string);
                 if (ele == NULL){
                     table_insert(stable, token.string, token.name);
@@ -497,42 +508,42 @@ TOKEN tokenizer(ST stable){
                 break;
 
             case 18:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isLetter(character))
-                    state = 19;
+                    s->state = 19;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 19:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isLetter(character))
-                    state = 19;
+                    s->state = 19;
                 else if (isNumber(character))
-                    state = 20;
+                    s->state = 20;
                 else
-                    state = 21;
+                    s->state = 21;
                 break;
 
             case 20:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isNumber(character))
-                    state = 20;
+                    s->state = 20;
                 else
-                    state = 21;
+                    s->state = 21;
                 break;
 
             case 21:
-                retract(1);
-                if (lexeme_length() > MAX_FUN_ID_SIZE){
-                    state = 59;
+                retract(1, s);
+                if (lexeme_length(s) > MAX_FUN_ID_SIZE){
+                    s->state = 59;
                     break;
                 }
                 token.name = TK_FUNID;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 ele = table_lookup(stable, token.string);
                 if (ele == NULL){
                     table_insert(stable, token.string, token.name);
@@ -544,28 +555,28 @@ TOKEN tokenizer(ST stable){
                 break;
 
             case 22:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isLowercase(character))
-                    state = 23;
+                    s->state = 23;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 23:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (isLowercase(character))
-                    state = 23;
+                    s->state = 23;
                 else
-                    state = 24;
+                    s->state = 24;
                 break;
 
             case 24:
-                retract(1);
+                retract(1, s);
                 token.name = TK_RUID;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 ele = table_lookup(stable, token.string);
                 if (ele == NULL){
                     table_insert(stable, token.string, token.name);
@@ -574,389 +585,401 @@ TOKEN tokenizer(ST stable){
                 break;
 
             case 25:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '-')
-                    state = 26;
+                    s->state = 26;
                 else if (character == '=')
-                    state = 31;
+                    s->state = 31;
                 else
-                    state = 29;
+                    s->state = 29;
                 break;
 
             case 26:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '-')
-                    state = 27;
+                    s->state = 27;
                 else
-                    state = 30;
+                    s->state = 30;
                 break;
 
             case 27:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '-')
-                    state = 28;
+                    s->state = 28;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 28:
                 token.name = TK_ASSIGNOP;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 29:
-                retract(1);
+                retract(1, s);
                 token.name = TK_LT;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 30:
-                retract(2);
+                retract(2, s);
                 token.name = TK_LT;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 31:
                 token.name = TK_LE;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 32:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '=')
-                    state = 33;
+                    s->state = 33;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 33:
                 token.name = TK_EQ;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 34:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '=')
-                    state = 35;
+                    s->state = 35;
                 else
-                    state = 36;
+                    s->state = 36;
                 break;
 
             case 35:
                 token.name = TK_GE;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 36:
-                retract(1);
+                retract(1, s);
                 token.name = TK_GT;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 37:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '=')
-                    state = 38;
+                    s->state = 38;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 38:
                 token.name = TK_NE;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 39:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '@')
-                    state = 40;
+                    s->state = 40;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 40:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '@')
-                    state = 41;
+                    s->state = 41;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 41:
                 token.name = TK_OR;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 42:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '&')
-                    state = 43;
+                    s->state = 43;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 43:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '&')
-                    state = 44;
+                    s->state = 44;
                 else
-                    state = 59;
+                    s->state = 59;
                 break;
 
             case 44:
                 token.name = TK_AND;
-                strcpy(token.string, tokenFromPtrs());
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcpy(token.string, tokenFromPtrs(s));
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 45:
                 token.name = TK_SQL;
                 strcpy(token.string, "[");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 46:
                 token.name = TK_SQR;
                 strcpy(token.string, "]");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 47:
                 token.name = TK_COMMA;
                 strcpy(token.string, ",");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 48:
                 token.name = TK_SEM;
                 strcpy(token.string, ";");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 49:
                 token.name = TK_COLON;
                 strcpy(token.string, ":");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 50:
                 token.name = TK_DOT;
                 strcpy(token.string, ".");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 51:
                 token.name = TK_OP;
                 strcpy(token.string, "(");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 52:
                 token.name = TK_CL;
                 strcpy(token.string, ")");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 53:
                 token.name = TK_PLUS;
                 strcpy(token.string, "+");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 54:
                 token.name = TK_MINUS;
                 strcpy(token.string, "-");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 55:
                 token.name = TK_MUL;
                 strcpy(token.string, "*");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 56:
                 token.name = TK_DIV;
                 strcpy(token.string, "/");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 57:
                 token.name = TK_NOT;
                 strcpy(token.string, "~");
-                token.lineNo = lineNo;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 58:
-                lexemeBegin = forwardPtr;
-                state = 0;
+                s->lexemeBegin = s->forwardPtr;
+                s->state = 0;
                 break;
 
             case 59:
-                retract(1);
+                retract(1, s);
                 token.name = TK_ERROR;
-                token.lineNo = lineNo;
+                token.lineNo = s->lineNo;
                 strcpy(token.string, "pattern");
-                strcat(token.string, tokenFromPtrs());
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcat(token.string, tokenFromPtrs(s));
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
             
             case 60:
-                character = getCharacter();
+                character = getCharacter(s);
                 if (character == '\n'){
-                    state = 63;
+                    s->state = 63;
                 }
                 else if (character == EOF){
                     token.name = TK_EOF;
-                    token.lineNo = lineNo;
+                    token.lineNo = s->lineNo;
                     return token;
                 }
                 else
-                    state = 60;
+                    s->state = 60;
                 break;
 
             case 61:
-                lineNo++;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                s->lineNo++;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 break;
 
             case 62:
                 token.name = TK_ERROR;
-                token.lineNo = lineNo;
+                token.lineNo = s->lineNo;
                 strcpy(token.string, "symbol");
-                strcat(token.string, tokenFromPtrs());
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcat(token.string, tokenFromPtrs(s));
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 63:
                 token.name = TK_COMMENT;
                 strcpy(token.string, "%");
-                token.lineNo = lineNo;
-                lineNo++;
-                state = 0;
-                lexemeBegin = forwardPtr;
+                token.lineNo = s->lineNo;
+                s->lineNo++;
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;
 
             case 64:
                 token.name = TK_ERROR;
-                token.lineNo = lineNo;
+                token.lineNo = s->lineNo;
                 strcpy(token.string, "size");
-                strcat(token.string, tokenFromPtrs());
-                state = 0;
-                lexemeBegin = forwardPtr;
+                strcat(token.string, tokenFromPtrs(s));
+                s->state = 0;
+                s->lexemeBegin = s->forwardPtr;
                 return token;
                 break;    
         }
     }
 }
 
-void lexer_main(char *filename) {
-    state = 0;
-    lineNo = 1;
-    filePointer = NULL;
-    sharedvar = 0;
-    memset(buffer, 0, 2 * BUFFER_SIZE);
-    lexemeBegin = 0;
-    forwardPtr = 0;
+void initialize(stateInfo *s) {
+    s->state = 0;
+    s->lineNo = 1;
+    s->lexemeBegin = 0;
+    s->forwardPtr = 0;
+    s->filePointer = NULL;
+    s->sharedVar = 0;
+    memset(s->buffer, 0, 2 * BUFFER_SIZE);
+}
 
-    filePointer = fopen(filename, "r");
-    if (filePointer == NULL) {
+void lexer_main(char *filename) {
+    // s->state = 0;
+    // s->lineNo = 1;
+    // s->filePointer = NULL;
+    // s->sharedVar = 0;
+    // memset(s->buffer, 0, 2 * BUFFER_SIZE);
+    // s->lexemeBegin = 0;
+    // s->forwardPtr = 0;
+    stateInfo *s = (stateInfo *)malloc(sizeof(stateInfo));
+    initialize(s);
+
+    s->filePointer = fopen(filename, "r");
+    if (s->filePointer == NULL) {
         printf("File not found\n");
         return;
     }
 
-    populateBuffer(0);
+    populateBuffer(0, s);
 
     ST stable = create_symbol_table();
     populate_symbol_table(stable);
 
-    while (buffer[forwardPtr] != EOF){
-        TOKEN token = tokenizer(stable);
-        if (token.name == TK_EOF){
+    while (s->buffer[s->forwardPtr] != EOF){
+        TOKEN token = tokenizer(stable, s);
+        if (token.name == TK_EOF) {
             break;
         }
 
@@ -998,7 +1021,7 @@ void lexer_main(char *filename) {
         }
     }
     printf("Symbol table entries (includes prepopulation 51) : %d \n", stable->token_count);
-    fclose(filePointer);
+    fclose(s->filePointer);
     free(stable);
 }
 
