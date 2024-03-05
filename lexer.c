@@ -19,15 +19,6 @@ Shantanu Ambekar: 2021A7PS2540P
 #include "lexerDef.h"
 #include "symbol_table.h"
 
-//-----*GLOBAL VARIABLES*-----
-int state = 0;
-int lexemeBegin,forwardPtr;
-int lineNo = 1;
-char buffer[2 * BUFFER_SIZE];
-FILE *filePointer;
-int sharedVar = 0;
-//-----*GLOBAL VARIABLES*-----
-
 //-----*HELPER FUNCTIONS*-----
 int isDigit(char c){
     return isdigit(c);
@@ -258,7 +249,7 @@ TOKEN tokenizer(ST stable, stateInfo *s){
     TOKEN token;
     token.integer = -1;
     token.realNum = -1;
-    token.string = (char*)malloc(sizeof(char) * 50);
+    token.string = (char*)malloc(sizeof(char) * 100);
     ST_ELEMENT ele;
 
     while (true){
@@ -957,13 +948,6 @@ void initialize(stateInfo *s) {
 }
 
 void lexer_main(char *filename) {
-    // s->state = 0;
-    // s->lineNo = 1;
-    // s->filePointer = NULL;
-    // s->sharedVar = 0;
-    // memset(s->buffer, 0, 2 * BUFFER_SIZE);
-    // s->lexemeBegin = 0;
-    // s->forwardPtr = 0;
     stateInfo *s = (stateInfo *)malloc(sizeof(stateInfo));
     initialize(s);
 
@@ -1035,7 +1019,7 @@ void removeComments(char *filename) {
         return;
     }
     char *newfile = malloc(100 * sizeof(char));
-    strcpy(newfile, "clean_");
+    strcpy(newfile, "commentremoval_");
     strcat(newfile, filename);
     FILE *tempFile = fopen(newfile, "w");
 

@@ -23,12 +23,13 @@ Shantanu Ambekar: 2021A7PS2540P
 #include "parserDef.h"
 #include "parser.h"
 
-// Definitions
+// --------Definitions for the parser--------
 NODE rules[NUM_RULES];
 FIRSTFOLLOW* FIRST_T[NUM_TOKENS];
 FIRSTFOLLOW* FIRST_NT[NUM_NON_TERMINALS];
 FIRSTFOLLOW* FOLLOW_NT[NUM_NON_TERMINALS];
 FIRSTFOLLOW* FOLLOW_T[NUM_TOKENS];
+// -----------------------------------------
 
 int symEqual(symbol s1, symbol s2){
     if(s1.is_terminal != s2.is_terminal)return 0;
@@ -83,10 +84,8 @@ void find_first_set(symbol sym){
 
     FIRSTFOLLOW* ptr = (FIRSTFOLLOW*)malloc(sizeof(FIRSTFOLLOW));
     ptr->head=NULL;
-    //handling first of terminals.
     if(sym.is_terminal==1){
         ptr->head = (NODE*)malloc(sizeof(NODE));
-        // ptr->head->sym = sym;
         ptr->head->sym.t = sym.t;
         ptr->head->sym.is_terminal=1;
         ptr->head->next = NULL;
@@ -131,9 +130,9 @@ void find_first_set(symbol sym){
     }
 }
 
-NODE* find_unique(NODE* root){ // use in follow set generation, not needed in first generation
+NODE* find_unique(NODE* root) {
     NODE* temp = root;
-    if(temp==NULL) return NULL; // Add null check
+    if(temp == NULL) return NULL;
     int token_cnt[NUM_TOKENS];
     for(int i=0; i<NUM_TOKENS; i++){
         token_cnt[i]=0;
@@ -222,14 +221,13 @@ int compareFollowSetsForEquality(FIRSTFOLLOW* f1, FIRSTFOLLOW* f2) {
         node2 = node2->next;
     }
 
-    // Check if the two arrays are equal
     for (int i = 0; i < NUM_TOKENS; i++) {
         if (tokens[i] != tokens2[i]) {
-            return 1; // Arrays are not equal
+            return 1;
         }
     }
 
-    return 0; // Arrays are equal
+    return 0;
 }
 
 void removeEpsFromFollow(FIRSTFOLLOW* followSet){
@@ -250,7 +248,6 @@ void removeEpsFromFollow(FIRSTFOLLOW* followSet){
     }
 }
 
-// Allocate memory to the follow sets and initialize them to empty. Follow sets of program and mainFunction are initialized to $.
 void allocateMemoryAndInitializeToFollowSet(){
     for(int i=0;i<NUM_NON_TERMINALS;i++){
         FOLLOW_NT[i]=(FIRSTFOLLOW*)malloc(sizeof(FIRSTFOLLOW));
@@ -309,7 +306,6 @@ void removeProgramNonTerminalFromFollow() {
     }
 }
 
-// Find the follow sets of the non-terminals in the grammar
 void findFollowSet(){
     allocateMemoryAndInitializeToFollowSet();
     int isChanged=1;
@@ -393,14 +389,11 @@ void findFollowSet(){
 
 }
 
-// Predictive Parse Table Functions -- Add NULL error checks
 PNODE** create_predictive_table(){
     PNODE ** predictive_table = (PNODE **) malloc(NUM_NON_TERMINALS * sizeof(PNODE *));
-    // Not initalizing pointers to structs (will be NULL if not required in final table)
     return predictive_table;
 }
 
-// Our table has one extra column corresponding to EPS token --> never write to eps even if first set contains eps --> should be error always
 void push_rule_to_table(NODE* rule_head, FIRSTFOLLOW* first_tokens, PNODE** predictive_table){
     nonterminal rule_lhs = rule_head->sym.nt;
     NODE * table_terminal_tokens = first_tokens->head;
@@ -415,17 +408,15 @@ void push_rule_to_table(NODE* rule_head, FIRSTFOLLOW* first_tokens, PNODE** pred
         }
         table_terminal_tokens = table_terminal_tokens->next;
     }
-    // All predictive_table[NT][T] which should raise errors are NULL (unitialized pointers)
 }
 
-// (Pass rules + i)
 void parse_grammar_rule_for_table(NODE* rule_head, PNODE** predictive_table) {
-    nonterminal rule_lhs = rule_head->sym.nt; // first node in rule is always the LHS NT
+    nonterminal rule_lhs = rule_head->sym.nt;
     NODE * rhs_cur = rule_head->next;
     if(rhs_cur->sym.is_terminal) {
         FIRSTFOLLOW* cur_first;
         if(rhs_cur->sym.t == TK_EPS){
-            cur_first = FOLLOW_NT[rule_lhs]; // NT --> TK_EPS in table (if rule is directly TK_EPS)
+            cur_first = FOLLOW_NT[rule_lhs];
         }else{
             cur_first = FIRST_T[rhs_cur->sym.t];
         }
@@ -447,7 +438,6 @@ void parse_grammar_rule_for_table(NODE* rule_head, PNODE** predictive_table) {
                     rhs_cur = rhs_cur->next;
                 }
             }
-            // Checking if the last term in RHS also contained epsilon in first set --> add rule to follow of original NT
             if (rhs_cur == NULL && cur_first->has_epsilon){
                 // Ending RHS term must be a NT in this case
                 cur_first = FOLLOW_NT[rule_head->sym.nt];
@@ -460,7 +450,6 @@ void parse_grammar_rule_for_table(NODE* rule_head, PNODE** predictive_table) {
 void push_syn_for_nt(PNODE** predictive_table, FIRSTFOLLOW * cur_first_follow, nonterminal cur_nt){
     NODE * first_head = cur_first_follow->head;
     while(first_head != NULL){
-        // skip if epsilon or rule already in place for this in table
         if(first_head->sym.t != TK_EPS && predictive_table[cur_nt][first_head->sym.t].rule_rhs == NULL){
             predictive_table[cur_nt][first_head->sym.t].is_syn = 1;
         }
@@ -468,8 +457,7 @@ void push_syn_for_nt(PNODE** predictive_table, FIRSTFOLLOW * cur_first_follow, n
     }
 }
 
-void populate_predictive_table_syn_tokens(PNODE** predictive_table){
-    // For all NT's if FIRSTFOLLOW NT's node NULL or FOLLOW(NT) node NULL
+void populate_predictive_table_syn_tokens(PNODE** predictive_table) {
     for(int i = 0 ; i < NUM_NON_TERMINALS; i++){
         FIRSTFOLLOW* cur_first = FIRST_NT[i];
         FIRSTFOLLOW* cur_follow = FOLLOW_NT[i];
@@ -482,14 +470,12 @@ void populate_predictive_table_error_tokens(PNODE ** predictive_table){
     int count = 0;
     for(int i = 0; i < NUM_NON_TERMINALS; i++){
         for(int j = 0;  j < NUM_TOKENS; j++){
-            // Syn should have already been populated for required tokens
             if(predictive_table[i][j].rule_rhs == NULL && predictive_table[i][j].is_syn == 0){
                 predictive_table[i][j].is_error = 1;
                 count += 1;
             }
         }
     }
-    // printf("ERROR TOKENS : %d \n", count);
 }
 
 void add_extra_syn_tokens(PNODE ** predictive_table){
@@ -506,14 +492,12 @@ void add_extra_syn_tokens(PNODE ** predictive_table){
 }
 
 PNODE** generate_predictive_table(NODE * grammar_rules){
-    PNODE ** predictive_table = create_predictive_table(); // Unpopulated
+    PNODE ** predictive_table = create_predictive_table();
     for(int i = 0; i < NUM_RULES; i++){
         parse_grammar_rule_for_table((grammar_rules+i), predictive_table);
     }
-    // Add SYN tokens
     populate_predictive_table_syn_tokens(predictive_table);
 
-    // Set ERROR tokens
     populate_predictive_table_error_tokens(predictive_table);
 
     return predictive_table;
@@ -533,7 +517,6 @@ void print_list(NODE* root){
 
 void push_list(NODE * rule_head, struct StackNode ** stack, Node * treeNode, int syn_eps){
     if(syn_eps){
-        // Adding NT --> e if syn encountered
         symbol eps;
         eps.is_terminal = 1;
         eps.t = TK_EPS;
@@ -542,14 +525,11 @@ void push_list(NODE * rule_head, struct StackNode ** stack, Node * treeNode, int
     }
     if(rule_head ==  NULL) {
         return;
-    }else if(rule_head->sym.is_terminal && rule_head->sym.t == TK_EPS) { // Don't push to stack but write to tree
-        // Popping NT off stack --> NT --> E
-        // printf("POPPING FROM STACK WITH NO REPLACEMENT \n");
+    }else if(rule_head->sym.is_terminal && rule_head->sym.t == TK_EPS) {
         add_child(NULL, treeNode, rule_head->sym);
         return;
     }
     push_list(rule_head->next, stack, treeNode, 0);
-    // ADD child + push child pointer into stack along with the current sym
     Node * tree_child_pointer = add_child(NULL, treeNode, rule_head->sym);
     push(stack, rule_head->sym,tree_child_pointer);
 }
@@ -905,18 +885,11 @@ int getNonTerminal(char* token) {
         return A;
     }
     else {
-        return -1; // Return -1 for unknown non-terminals
+        return -1;
     }
 }
 
-void parser_main(char * filename, char *outfile){
-    // parse_state = 0;
-    // parse_lineNo = 1;
-    // parse_filePointer = NULL;
-    // parse_sharedvar = 0;
-    // memset(parse_buffer, 0, 2 * BUFFER_SIZE);
-    // parse_lexemeBegin = 0;
-    // parse_forwardPtr = 0;
+void parser_main(char * filename, char *outfile) {
     stateInfo *s = (stateInfo *)malloc(sizeof(stateInfo));
     initialize(s);
 
@@ -957,7 +930,6 @@ void parser_main(char * filename, char *outfile){
 
         while(token) {
             if (strcmp(token, "===>")) {
-
                 NODE* root = malloc(sizeof(NODE));
                 if (getNonTerminal(token) != -1) {
                     root->sym.nt = getNonTerminal(token);
@@ -996,6 +968,7 @@ void parser_main(char * filename, char *outfile){
     }
     printf("First Set generated\n");
 
+    // computes follow set
     findFollowSet();
     printf("Follow Set generated\n");
 
@@ -1003,16 +976,13 @@ void parser_main(char * filename, char *outfile){
     printf("Predictive table generated\n");
     printf("Both lexical and syntax analysis modules developed\n\n");
 
-    // Extra syn token inclusion
     add_extra_syn_tokens(predictive_table);
 
     struct StackNode* stack = NULL;
 
-    // TK_DOLLAR not in tree
     symbol sym1 = {.t = TK_DOLLAR, .is_terminal = 1};
     push(&stack, sym1, NULL);
     
-    // Create root node in tree + push pointer to stack with symbol
     symbol sym2 = {.nt = program, .is_terminal = 0};
     ParseTree * ast = create_parse_tree_with_root(sym2);
     push(&stack, sym2, ast->root);
@@ -1062,14 +1032,11 @@ void parser_main(char * filename, char *outfile){
             }
             if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==0 && predictive_table[sym.nt][curr.name].is_error==0){
                 pop(&stack, curr);
-                // printf("%s ==> ", parse_nonterminaltoString(sym.nt)); // Print the LHS of the rule
-                // print_list(predictive_table[sym.nt][curr.name].rule_rhs);
                 push_list(predictive_table[sym.nt][curr.name].rule_rhs, &stack, cur_top->treeNode, 0);
                 free(cur_top);
                 call_token=0;
                 continue;
-            }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==1){
-                // SYN
+            }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==1) {
                 printf("\033[0;31m");
                 printf("Line no.%3d:  SYNTAX ERROR : (SYN) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, tokenToString(curr.name), curr.string, nonterminaltoString(sym.nt));
                 printf("\033[0m");
@@ -1078,8 +1045,7 @@ void parser_main(char * filename, char *outfile){
                 free(cur_top);
                 call_token=0;
                 continue;
-            }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_error==1){
-                // ERROR
+            }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_error==1) {
                 printf("\033[0;31m");
                 printf("Line no.%3d:  SYNTAX ERROR : (ERROR) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, tokenToString(curr.name), curr.string, nonterminaltoString(sym.nt));
                 printf("\033[0m");
@@ -1110,7 +1076,5 @@ void parser_main(char * filename, char *outfile){
     fprintf(outf, "%-30s %-5s %-30s %-10s %-30s %-8s %-30s\n\n", "Lexeme", "Line", "Token name", "Value", "Parent", "Leaf?", "Non terminal symbol");
     print_inorder(ast->root, NULL, outf);
     fclose(outf);
-    // printf("%s\n", nonterminaltoString(ast->root->data.nt));
-    // fclose(s->filePointer);
     printf("Inorder traversal of parse tree stored in file %s\n", outfile);
 }

@@ -22,6 +22,9 @@ Shantanu Ambekar: 2021A7PS2540P
 #include <time.h>
 
 int main(int argc, char *argv[]) {
+    clock_t start_time, end_time;
+    double total_CPU_time, total_CPU_time_in_seconds;
+    int parsed = 0;
     while(1) {
         int option;
         printf("\n-----------MENU-----------\n");
@@ -40,10 +43,9 @@ int main(int argc, char *argv[]) {
 
         char *filename = argv[1];
         char *outfile = argv[2];
-        clock_t start_time, end_time;
-        double total_CPU_time, total_CPU_time_in_seconds;
 
         if (option == 0) {
+            printf("Exiting...\n");
             break;
         }
         else if (option == 1) {
@@ -61,6 +63,7 @@ int main(int argc, char *argv[]) {
 
             parser_main(filename, outfile);
             printf("\n");
+            parsed = 1;
 
             end_time = clock();
             total_CPU_time = (double) (end_time - start_time);
@@ -68,6 +71,10 @@ int main(int argc, char *argv[]) {
         }
         else if (option == 4) {
             // print time
+            if (parsed == 0) {
+                printf("Please generate the parse tree first\n");
+                continue;
+            }
             printf("\033[0;32m");
             printf("\nTotal CPU time: %f\n", total_CPU_time);
             printf("Total CPU time in seconds: %f\n", total_CPU_time_in_seconds);

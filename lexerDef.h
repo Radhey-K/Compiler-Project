@@ -18,7 +18,7 @@ Shantanu Ambekar: 2021A7PS2540P
 #define BUFFER_SIZE 200
 
 typedef enum {
-    TK_UNKNOWN, // For symbol table entry init
+    TK_UNKNOWN,
     TK_ASSIGNOP,
     TK_COMMENT,
     TK_FIELDID,
@@ -76,7 +76,7 @@ typedef enum {
     TK_GT,
     TK_GE,
     TK_NE,
-    TK_EOF, // To detect that file has terminated
+    TK_EOF,
     TK_EPS,
     TK_ERROR,
     TK_DOLLAR
@@ -140,7 +140,7 @@ typedef enum
 } nonterminal;
 
 typedef struct token {
-    tokName name; //should be an enum
+    tokName name;
     int lineNo;
     char* string;
     int integer;

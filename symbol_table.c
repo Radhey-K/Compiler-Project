@@ -27,29 +27,17 @@ ST create_symbol_table() {
 }
 
 ST_ELEMENT create_st_element(){
-    /**
-     * @brief create new empty node
-     */
     ST_ELEMENT st_ele = (ST_ELEMENT) malloc(sizeof(struct st_element));
     if (st_ele == NULL) {
         printf("Unable to create new symbol table element");
         return NULL;
     }
-    // st_ele->lexeme = NULL;
     st_ele->next = NULL;
     st_ele->tk_type = TK_UNKNOWN;
     return st_ele;
 }
 
 int hash_lexeme(char *lexeme) {
-    /**
-     * @brief 
-     * DJB2 HASH
-     * hash * 33 + c
-     * @param lexeme String to be hashed
-     * @return Index in symbol table (top bin)
-     */
-
     unsigned long hash = 5381;
     int c;
 
@@ -60,14 +48,6 @@ int hash_lexeme(char *lexeme) {
 }
 
 void table_insert(ST stable, char *lexeme, tokName tk_type){
-    /**
-     * @brief 
-     * Insert a lexeme & token-type to a particular symbol table
-     * @param stable The Symbol table to which this (lexeme,type) pair should be pushed
-     * @param lexeme String, actual token
-     * @param tktype Enum, token_type
-     */
-
     if (strlen(lexeme) > MAX_FUN_ID_SIZE) {
         printf("Insertion error - max lexeme length exceeded");
         return;
@@ -78,7 +58,6 @@ void table_insert(ST stable, char *lexeme, tokName tk_type){
         return;
     }
 
-    // Assuming table_lookup is always called before table insert
     ST_ELEMENT head = (stable->table + insert_index);
     while(head->next != NULL){
         head = head->next;
@@ -92,14 +71,7 @@ void table_insert(ST stable, char *lexeme, tokName tk_type){
     return;
 }
 
-// wherever called - check for NULL return + extract tk_type to create the actual token
 ST_ELEMENT table_lookup(ST stable, char *lexeme) {
-    /**
-     * @brief 
-     * Find symbol table entry for given lexeme
-     * @param stable Symbol table to search in
-     * @param lexeme String to be searched
-     */
     int insert_index = hash_lexeme(lexeme);
     if (stable == NULL) {
         printf("Symbol table not initialized");
@@ -124,9 +96,6 @@ int fetch_table_count(ST stable){
 }
 
 void populate_symbol_table(ST stable){
-    /**
-     * @brief push all keywords to table
-     */
     table_insert(stable, "<---", TK_ASSIGNOP);
     table_insert(stable, "%", TK_COMMENT);
     table_insert(stable, "with", TK_WITH);
@@ -179,12 +148,3 @@ void populate_symbol_table(ST stable){
     table_insert(stable, ">=", TK_GE);
     table_insert(stable, "!=", TK_NE);
 }
-
-
-// int main(){
-//     ST stable = create_symbol_table();
-//     populate_symbol_table(stable);
-//     ST_ELEMENT lookedup = table_lookup(stable, "abcdef");
-//     table_insert(stable, "!=", TK_NE);
-//     return 0;
-// }
