@@ -3,11 +3,13 @@
 #include "lexer.h"
 #include <stdlib.h>
 #include <string.h>
+
 typedef struct Node
 {
     symbol data;
     struct Node **children;
     int num_children;
+    TOKEN token;
 } Node;
 
 typedef struct ParseTree
@@ -38,5 +40,7 @@ Node **get_children(Node *parent, size_t *num_children);
 void print_parse_tree(Node *node, int depth);
 
 void print_inorder(Node *node);
+
+void add_lexeme_to_node(Node *node, TOKEN cur_token);
 
 #endif // PARSETREE_H

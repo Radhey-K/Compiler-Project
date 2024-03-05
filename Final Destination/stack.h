@@ -15,7 +15,7 @@ struct StackNode
 struct StackNode *createNode(symbol data, Node * treeNode);
 int isEmpty(struct StackNode *stack);
 void push(struct StackNode **stack, symbol data, Node * treeNode);
-struct StackNode * pop(struct StackNode **stack);
+struct StackNode * pop(struct StackNode **stack, TOKEN cur_token);
 struct StackNode * top(struct StackNode *stack);
 
 #endif
