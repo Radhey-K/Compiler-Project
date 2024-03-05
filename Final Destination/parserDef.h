@@ -38,7 +38,7 @@ typedef struct first{
     int has_epsilon;
     int is_filled;
     NODE* head;
-}FIRST;
+}FIRSTFOLLOW;
 
 typedef struct predictive_table_node{
     NODE *rule_rhs;

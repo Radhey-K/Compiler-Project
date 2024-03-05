@@ -968,7 +968,7 @@ void lexer_main(char *filename) {
 
     s->filePointer = fopen(filename, "r");
     if (s->filePointer == NULL) {
-        printf("File not found\n");
+        printf("Error: File not found\n");
         return;
     }
 

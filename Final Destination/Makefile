@@ -14,17 +14,11 @@ CC = gcc
 SRCS = driver.c lexer.c symbol_table.c parser.c parsetree.c stack.c
 
 # Define the target executable
-TARGET = compiler
+TARGET = stage1exe
 
 # Rule to build the target executable
 $(TARGET): $(SRCS)
 	@$(CC) -o $(TARGET) $(SRCS)
 
 # Default rule to run the target executable
-run: $(TARGET)
-	@./$(TARGET)
-	@make clean
-
-# Clean rule
-clean:
-	@rm -f $(TARGET) a.out
+build: $(TARGET)

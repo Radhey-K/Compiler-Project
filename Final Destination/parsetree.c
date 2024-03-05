@@ -11,6 +11,8 @@ Shantanu Ambekar: 2021A7PS2540P
 
 #include "parsetree.h"
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 // Constructor: Initialize an empty parse tree
 ParseTree *create_parse_tree()
@@ -168,29 +170,102 @@ void print_parse_tree(Node *node, int depth)
     }
 }
 
-void print_inorder(Node *node)
+// void print_inorder(Node *node, char *outname)
+// {
+//     FILE *outf = fopen(outname, "a");
+//     if (node != NULL)
+//     {
+//         if (node->num_children > 0)
+//         {
+//             print_inorder(node->children[0], outname);
+//         }
+//         if (node->data.is_terminal)
+//         {
+//             // printf("Terminal: %s\n", tokenToString(node->data.t));
+//             fprintf(outf, "Terminal: %s\n", tokenToString(node->data.t));
+//             // if node->data.t == TK_EPS (no line or lexeme)
+//             fprintf(outf, "Line No : %d\n", node->token.lineNo);
+//         }
+//         else
+//         {
+//             fprintf(outf, "Non-terminal: %s\n", nonterminaltoString(node->data.nt));
+//         }
+//         for (int i = 1; i < node->num_children; i++)
+//         {
+//             print_inorder(node->children[i], outname);
+//         }
+//     }
+//     fclose(outf);
+// }
+
+void print_inorder(Node *node, Node *parent, char *outfile)
 {
+    FILE *outf = fopen(outfile, "a");
     if (node != NULL)
     {
-        // if (node->num_children > 0)
-        // {
-        //     print_inorder(node->children[0]);
-        // }
+        char *lexeme;
+        int line_number;
+        char *token_name;
+        float value;
+        const char *parent_symbol;
+        const char *leaf;
+        const char *non_terminal;
+
+        if (node->num_children > 0)
+        {
+            print_inorder(node->children[0], node, outfile);
+        }
         if (node->data.is_terminal)
         {
-            printf("Terminal: %s\n", tokenToString(node->data.t));
-            // if node->data.t == TK_EPS (no line or lexeme)
-            printf("Line No : %d\n", node->token.lineNo);
+            // 1. Lexeme if leaf else “—-”
+            lexeme = "testing";
+            // 2. Line number
+            line_number = (node->token.name == TK_EPS) ? -1 : node->token.lineNo;
+            // 3. Token name
+            token_name = tokenToString(node->token.name);
+
+            // 4. Value of lexeme if int or real
+            value = (node->token.integer != -1) ? node->token.integer : ((node->token.realNum != -1.0) ? node->token.realNum : 0.0);
+
+            // 5. Parent (ROOT)
+            parent_symbol = (parent == NULL) ? "ROOT" : (parent->data.is_terminal ? "Terminal" : nonterminaltoString(parent->data.nt));
+
+            // 6. YES/NO
+            leaf = (node->data.is_terminal) ? "yes" : "no";
+
+            // 7. Non-terminal symbol if node not leaf
+            non_terminal = (node->data.is_terminal) ? "---" : nonterminaltoString(node->data.nt);
         }
         else
         {
-            printf("Non-terminal: %s\n", nonterminaltoString(node->data.nt));
+            // 1. Lexeme if leaf else “—-”
+            lexeme = "testing";
+            // 2. Line number
+            line_number = (node->token.name == TK_EPS) ? -1 : node->token.lineNo;
+            // 3. Token name
+            token_name = tokenToString(node->token.name);
+
+            // 4. Value of lexeme if int or real
+            value = (node->token.integer != -1) ? node->token.integer : ((node->token.realNum != -1.0) ? node->token.realNum : 0.0);
+
+            // 5. Parent (ROOT)
+            parent_symbol = (parent == NULL) ? "ROOT" : (parent->data.is_terminal ? "Terminal" : nonterminaltoString(parent->data.nt));
+
+            // 6. YES/NO
+            leaf = (node->data.is_terminal) ? "yes" : "no";
+
+            // 7. Non-terminal symbol if node not leaf
+            non_terminal = (node->data.is_terminal) ? "---" : nonterminaltoString(node->data.nt);
         }
-        for (int i = 0; i < node->num_children; i++)
+
+        fprintf(outf, "%-20s %-10d %-20s %-10.2f %-20s %-5s %-20s\n", lexeme, line_number, token_name, value, parent_symbol, leaf, non_terminal);
+
+        for (int i = 1; i < node->num_children; i++)
         {
-            print_inorder(node->children[i]);
+            print_inorder(node->children[i], node, outfile);
         }
     }
+    fclose(outf);
 }
 
 void add_lexeme_to_node(Node *node, TOKEN cur_token){

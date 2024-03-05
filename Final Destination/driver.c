@@ -21,7 +21,7 @@ Shantanu Ambekar: 2021A7PS2540P
 #include <ctype.h>
 #include <time.h>
 
-int main(void) {
+int main(int argc, char *argv[]) {
     while(1) {
         int option;
         printf("\n-----------MENU-----------\n");
@@ -34,49 +34,43 @@ int main(void) {
         printf("--------------------------\n");
         printf("Enter your option: ");
         scanf("%d", &option);
+        if (argc != 3) {
+            printf("Invalid number of arguments : ./stage1exe {source file} {parsetree outfile}\n");
+            break;
+        }
+
+        char *filename = argv[1];
+        char *outfile = argv[2];
 
         if (option == 0) {
             break;
         }
         else if (option == 1) {
             // remove comments
-            char *filename = malloc(100 * sizeof(char));
-            printf("Enter the filename: ");
-            scanf("%s", filename);
             removeComments(filename);
         }
         else if (option == 2) {
             // print token list
-            char *filename = malloc(100 * sizeof(char));
-            printf("Enter the filename: ");
-            scanf("%s", filename);
             lexer_main(filename);
             printf("\n");
         }
         else if (option == 3) {
             // print parse tree
-            char *filename = malloc(100 * sizeof(char));
-            printf("Enter the filename: ");
-            scanf("%s", filename);
-            parser_main(filename);
+            parser_main(filename, outfile);
             printf("\n");
         }
         else if (option == 4) {
+            
             // measure time
             clock_t start_time, end_time;
             double total_CPU_time, total_CPU_time_in_seconds;
             start_time = clock();
 
-            char *filename = malloc(100 * sizeof(char));
-            printf("Enter the filename: ");
-            scanf("%s", filename);
-
             int original_stdout = dup(fileno(stdout));
             int devnull = open("/dev/null", O_WRONLY);
 
             dup2(devnull, fileno(stdout));
-            lexer_main(filename);
-            parser_main(filename);
+            parser_main(filename, outfile);
             dup2(original_stdout, fileno(stdout));
 
             end_time = clock();
