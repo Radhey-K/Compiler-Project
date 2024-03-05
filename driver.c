@@ -33,10 +33,10 @@ int main(int argc, char *argv[]) {
         printf("--------------------------\n");
         printf("Enter your option: ");
         scanf("%d", &option);
-        // if (argc != 3) {
-        //     printf("Invalid number of arguments : ./stage1exe {source file} {parsetree outfile}\n");
-        //     break;
-        // }
+        if (argc != 3) {
+            printf("Invalid number of arguments : ./stage1exe {source file} {parsetree outfile}\n");
+            break;
+        }
 
         char *filename = argv[1];
         char *outfile = argv[2];
