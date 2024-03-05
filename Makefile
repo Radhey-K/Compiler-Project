@@ -22,3 +22,6 @@ $(TARGET): $(SRCS)
 
 # Default rule to run the target executable
 build: $(TARGET)
+
+clean: $(TARGET)
+	rm $(TARGET)

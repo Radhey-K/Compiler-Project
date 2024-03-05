@@ -10,8 +10,11 @@ Shantanu Ambekar: 2021A7PS2540P
 --------------------------------------*/
 
 #include "parsetree.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <ctype.h>
 #include <fcntl.h>
 
 // Constructor: Initialize an empty parse tree
@@ -203,9 +206,9 @@ void print_inorder(Node *node, Node *parent, char *outfile)
     FILE *outf = fopen(outfile, "a");
     if (node != NULL)
     {
-        char *lexeme;
+        char *lexeme = malloc(50 * sizeof(char));
         int line_number;
-        char *token_name;
+        const char* token_name;
         float value;
         const char *parent_symbol;
         const char *leaf;
@@ -218,11 +221,10 @@ void print_inorder(Node *node, Node *parent, char *outfile)
         if (node->data.is_terminal)
         {
             // 1. Lexeme if leaf else “—-”
-            lexeme = "testing";
             // 2. Line number
             line_number = (node->token.name == TK_EPS) ? -1 : node->token.lineNo;
             // 3. Token name
-            token_name = tokenToString(node->token.name);
+            token_name = (node->data.is_terminal) ? tokenToString(node->data.t) : nonterminaltoString(node->data.nt);
 
             // 4. Value of lexeme if int or real
             value = (node->token.integer != -1) ? node->token.integer : ((node->token.realNum != -1.0) ? node->token.realNum : 0.0);
@@ -235,15 +237,22 @@ void print_inorder(Node *node, Node *parent, char *outfile)
 
             // 7. Non-terminal symbol if node not leaf
             non_terminal = (node->data.is_terminal) ? "---" : nonterminaltoString(node->data.nt);
+
+            if (node->token.integer != -1)
+                fprintf(outf, "%-30d %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.integer, line_number, token_name, value, parent_symbol, leaf, non_terminal);
+            else if (node->token.realNum != -1)
+                fprintf(outf, "%-30f %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.realNum, line_number, token_name, value, parent_symbol, leaf, non_terminal);
+            else
+                fprintf(outf, "%-30s %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.string, line_number, token_name, value, parent_symbol, leaf, non_terminal);
         }
         else
         {
             // 1. Lexeme if leaf else “—-”
-            lexeme = "testing";
+            lexeme = "---";
             // 2. Line number
-            line_number = (node->token.name == TK_EPS) ? -1 : node->token.lineNo;
+            line_number = -1;
             // 3. Token name
-            token_name = tokenToString(node->token.name);
+            token_name = (node->data.is_terminal) ? tokenToString(node->data.t) : nonterminaltoString(node->data.nt);
 
             // 4. Value of lexeme if int or real
             value = (node->token.integer != -1) ? node->token.integer : ((node->token.realNum != -1.0) ? node->token.realNum : 0.0);
@@ -256,9 +265,10 @@ void print_inorder(Node *node, Node *parent, char *outfile)
 
             // 7. Non-terminal symbol if node not leaf
             non_terminal = (node->data.is_terminal) ? "---" : nonterminaltoString(node->data.nt);
+            fprintf(outf, "%-30s %-5d %-30s %-10.2f %-30s %-8s %-30s\n", lexeme, line_number, token_name, value, parent_symbol, leaf, non_terminal);
         }
 
-        fprintf(outf, "%-20s %-10d %-20s %-10.2f %-20s %-5s %-20s\n", lexeme, line_number, token_name, value, parent_symbol, leaf, non_terminal);
+        // fprintf(outf, "%-20s %-10d %-20s %-10.2f %-20s %-5s %-20s\n", lexeme, line_number, token_name, value, parent_symbol, leaf, non_terminal);
 
         for (int i = 1; i < node->num_children; i++)
         {

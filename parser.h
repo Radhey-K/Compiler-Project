@@ -13,7 +13,7 @@ Shantanu Ambekar: 2021A7PS2540P
 #define PARSER_H
 #include "parserDef.h"
 
-void parser_main(char * filename, char *outfile);
+void parser_main(char * filename, char *outfile, int print);
 void merge_list(FIRSTFOLLOW* f1, FIRSTFOLLOW* f2, int flag);
 void find_first_set(symbol sym);
 NODE* find_unique(NODE* root);

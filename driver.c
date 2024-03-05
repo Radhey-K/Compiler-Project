@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
         }
         else if (option == 3) {
             // print parse tree
-            parser_main(filename, outfile);
+            parser_main(filename, outfile, 0);
             printf("\n");
         }
         else if (option == 4) {
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
             int devnull = open("/dev/null", O_WRONLY);
 
             dup2(devnull, fileno(stdout));
-            parser_main(filename, outfile);
+            parser_main(filename, outfile, 1);
             dup2(original_stdout, fileno(stdout));
 
             end_time = clock();

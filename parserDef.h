@@ -28,12 +28,6 @@ typedef struct node{
     struct node* next;
 }NODE;
 
-typedef struct lhsnode{
-    int numProductions;
-    symbol sym;
-    NODE** productionRule;
-}LHSNODE;
-
 typedef struct first{
     int has_epsilon;
     int is_filled;

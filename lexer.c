@@ -54,6 +54,7 @@ int digit_2to7(char c){
 
 const char* tokenToString(tokName token) {
     switch(token) {
+        case TK_UNKNOWN: return "TK_UNKNOWN";
         case TK_ASSIGNOP: return "TK_ASSIGNOP";
         case TK_COMMENT: return "TK_COMMENT";
         case TK_FIELDID: return "TK_FIELDID";
