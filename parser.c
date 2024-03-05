@@ -909,7 +909,7 @@ int getNonTerminal(char* token) {
     }
 }
 
-void parser_main(char * filename, char *outfile, int print){
+void parser_main(char * filename, char *outfile){
     // parse_state = 0;
     // parse_lineNo = 1;
     // parse_filePointer = NULL;
@@ -1106,11 +1106,11 @@ void parser_main(char * filename, char *outfile, int print){
     printf("Error recovery done\n");
 
     printf("\n\n");
-    if (print == 0) {
-        FILE *outf = fopen(outfile, "w");
-        fprintf(outf, "%-30s %-5s %-30s %-10s %-30s %-8s %-30s\n\n", "Lexeme", "Line", "Token name", "Value", "Parent", "Leaf?", "Non terminal symbol");
-        fclose(outf);
-        print_inorder(ast->root, NULL, outfile);
-        printf("Inorder traversal of parse tree stored in file %s\n", outfile);
-    }
+    FILE *outf = fopen(outfile, "w");
+    fprintf(outf, "%-30s %-5s %-30s %-10s %-30s %-8s %-30s\n\n", "Lexeme", "Line", "Token name", "Value", "Parent", "Leaf?", "Non terminal symbol");
+    print_inorder(ast->root, NULL, outf);
+    fclose(outf);
+    // printf("%s\n", nonterminaltoString(ast->root->data.nt));
+    // fclose(s->filePointer);
+    printf("Inorder traversal of parse tree stored in file %s\n", outfile);
 }

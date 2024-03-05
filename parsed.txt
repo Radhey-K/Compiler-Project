@@ -1,0 +1,20 @@
+Lexeme                         Line  Token name                     Value      Parent                         Leaf?    Non terminal symbol           
+
+0                              0     TK_EPS                         0.00       <otherFunctions>               yes      ---                           
+---                            -1    <otherFunctions>               0.00       <program>                      no       <otherFunctions>              
+---                            -1    <program>                      0.00       ROOT                           no       <program>                     
+_main                          1     TK_MAIN                        0.00       <mainFunction>                 yes      ---                           
+---                            -1    <mainFunction>                 0.00       <program>                      no       <mainFunction>                
+0                              0     TK_EPS                         0.00       <typeDefinitions>              yes      ---                           
+---                            -1    <typeDefinitions>              0.00       <stmts>                        no       <typeDefinitions>             
+---                            -1    <stmts>                        0.00       <mainFunction>                 no       <stmts>                       
+0                              0     TK_EPS                         0.00       <declarations>                 yes      ---                           
+---                            -1    <declarations>                 0.00       <stmts>                        no       <declarations>                
+0                              0     TK_EPS                         0.00       <otherStmts>                   yes      ---                           
+---                            -1    <otherStmts>                   0.00       <stmts>                        no       <otherStmts>                  
+return                         2     TK_RETURN                      0.00       <returnStmt>                   yes      ---                           
+---                            -1    <returnStmt>                   0.00       <stmts>                        no       <returnStmt>                  
+0                              0     TK_EPS                         0.00       <optionalReturn>               yes      ---                           
+---                            -1    <optionalReturn>               0.00       <returnStmt>                   no       <optionalReturn>              
+;                              2     TK_SEM                         0.00       <returnStmt>                   yes      ---                           
+end                            3     TK_END                         0.00       <mainFunction>                 yes      ---                           

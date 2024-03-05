@@ -178,32 +178,47 @@ void print_parse_tree(Node *node, int depth)
 //     FILE *outf = fopen(outname, "a");
 //     if (node != NULL)
 //     {
-//         if (node->num_children > 0)
-//         {
-//             print_inorder(node->children[0], outname);
-//         }
-//         if (node->data.is_terminal)
-//         {
-//             // printf("Terminal: %s\n", tokenToString(node->data.t));
-//             fprintf(outf, "Terminal: %s\n", tokenToString(node->data.t));
-//             // if node->data.t == TK_EPS (no line or lexeme)
-//             fprintf(outf, "Line No : %d\n", node->token.lineNo);
-//         }
-//         else
-//         {
-//             fprintf(outf, "Non-terminal: %s\n", nonterminaltoString(node->data.nt));
-//         }
-//         for (int i = 1; i < node->num_children; i++)
-//         {
-//             print_inorder(node->children[i], outname);
-//         }
+//         // // if (node->num_children > 0)
+//         // // {
+//         // //     print_inorder(node->children[0], outname);
+//         // // }
+//         // // if (node->data.is_terminal)
+//         // // {
+//         // //     // printf("Terminal: %s\n", tokenToString(node->data.t));
+//         // //     fprintf(outf, "Terminal: %s\n", tokenToString(node->data.t));
+//         // //     // if node->data.t == TK_EPS (no line or lexeme)
+//         // //     fprintf(outf, "Line No : %d\n", node->token.lineNo);
+//         // // }
+//         // // else
+//         // // {
+//         // //     fprintf(outf, "Non-terminal: %s\n", nonterminaltoString(node->data.nt));
+//         // // }
+//         // // for (int i = 1; i < node->num_children; i++)
+//         // // {
+//         // //     print_inorder(node->children[i], outname);
+//         // // }
+//         // if (node->num_children == 0) {
+//         //     printf("Terminal: %s\n", tokenToString(node->data.t));
+//         //     return;
+//         // }
+//         // print_inorder(node->children[node->num_children - 1], outname);
 //     }
 //     fclose(outf);
 // }
+// void print_inorder(Node *node, FILE *outf) {
+//     if (node != NULL) {
+//         if (node->num_children > 0) {
+//             print_inorder(node->children[0], outf);
+//         }
+//         fprintf(outf, "%s\n", node->data.is_terminal ? tokenToString(node->data.t) : nonterminaltoString(node->data.nt));
+//         fflush(outf);
+//         for(int i = 1; i < node->num_children; i++)
+//             print_inorder(node->children[i], outf);
+//     }
+// }
 
-void print_inorder(Node *node, Node *parent, char *outfile)
+void print_inorder(Node *node, Node *parent, FILE *outfile)
 {
-    FILE *outf = fopen(outfile, "a");
     if (node != NULL)
     {
         char *lexeme = malloc(50 * sizeof(char));
@@ -239,11 +254,11 @@ void print_inorder(Node *node, Node *parent, char *outfile)
             non_terminal = (node->data.is_terminal) ? "---" : nonterminaltoString(node->data.nt);
 
             if (node->token.integer != -1)
-                fprintf(outf, "%-30d %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.integer, line_number, token_name, value, parent_symbol, leaf, non_terminal);
+                fprintf(outfile, "%-30d %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.integer, line_number, token_name, value, parent_symbol, leaf, non_terminal);
             else if (node->token.realNum != -1)
-                fprintf(outf, "%-30f %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.realNum, line_number, token_name, value, parent_symbol, leaf, non_terminal);
+                fprintf(outfile, "%-30f %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.realNum, line_number, token_name, value, parent_symbol, leaf, non_terminal);
             else
-                fprintf(outf, "%-30s %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.string, line_number, token_name, value, parent_symbol, leaf, non_terminal);
+                fprintf(outfile, "%-30s %-5d %-30s %-10.2f %-30s %-8s %-30s\n", node->token.string, line_number, token_name, value, parent_symbol, leaf, non_terminal);
         }
         else
         {
@@ -265,9 +280,9 @@ void print_inorder(Node *node, Node *parent, char *outfile)
 
             // 7. Non-terminal symbol if node not leaf
             non_terminal = (node->data.is_terminal) ? "---" : nonterminaltoString(node->data.nt);
-            fprintf(outf, "%-30s %-5d %-30s %-10.2f %-30s %-8s %-30s\n", lexeme, line_number, token_name, value, parent_symbol, leaf, non_terminal);
+            fprintf(outfile, "%-30s %-5d %-30s %-10.2f %-30s %-8s %-30s\n", lexeme, line_number, token_name, value, parent_symbol, leaf, non_terminal);
         }
-
+        fflush(outfile);
         // fprintf(outf, "%-20s %-10d %-20s %-10.2f %-20s %-5s %-20s\n", lexeme, line_number, token_name, value, parent_symbol, leaf, non_terminal);
 
         for (int i = 1; i < node->num_children; i++)
@@ -275,7 +290,6 @@ void print_inorder(Node *node, Node *parent, char *outfile)
             print_inorder(node->children[i], node, outfile);
         }
     }
-    fclose(outf);
 }
 
 void add_lexeme_to_node(Node *node, TOKEN cur_token){
