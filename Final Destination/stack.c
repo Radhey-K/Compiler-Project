@@ -37,13 +37,18 @@ void push(struct StackNode **stack, symbol data, Node * treeNode)
 }
 
 //If not empty return StructNode (we need both pointer + symbol for lookup) else return NULL pointer
-struct StackNode * pop(struct StackNode **stack)
+struct StackNode * pop(struct StackNode **stack, TOKEN cur_token)
 {
     if (isEmpty(*stack))
     {
         return NULL;
     }
     struct StackNode *temp = *stack;
+    // Call update function for tree node
+    if (temp->data.is_terminal){
+        // Then pass cur_token to tree
+        add_lexeme_to_node(temp->treeNode, cur_token);
+    } // Else popping non-terminal from stack (no lexeme update needed)
     *stack = (*stack)->next;
     return temp;
 }

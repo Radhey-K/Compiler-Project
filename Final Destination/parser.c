@@ -492,6 +492,19 @@ void populate_predictive_table_error_tokens(PNODE ** predictive_table){
     // printf("ERROR TOKENS : %d \n", count);
 }
 
+void add_extra_syn_tokens(PNODE ** predictive_table){
+    tokName list[] = {TK_SEM, TK_CL, TK_SQR, TK_ENDRECORD, TK_ENDUNION, TK_ENDIF, TK_ENDWHILE, TK_ELSE};
+    int n = 8;
+    for(int i = 0; i < NUM_NON_TERMINALS ; i++){
+        for(int j = 0 ; j < n ; j++){
+            if(predictive_table[i][list[j]].rule_rhs == NULL){
+                predictive_table[i][list[j]].is_syn = 1;
+                predictive_table[i][list[j]].is_error = 0;
+            }
+        } 
+    }
+}
+
 PNODE** generate_predictive_table(NODE * grammar_rules){
     PNODE ** predictive_table = create_predictive_table(); // Unpopulated
     for(int i = 0; i < NUM_RULES; i++){
@@ -986,6 +999,9 @@ void parser_main(char * filename){
 
     PNODE** predictive_table = generate_predictive_table(rules);
 
+    // Extra syn token inclusion
+    add_extra_syn_tokens(predictive_table);
+
     struct StackNode* stack = NULL;
 
     // TK_DOLLAR not in tree
@@ -1012,25 +1028,19 @@ void parser_main(char * filename){
         }else if (strstr(curr.string, "pattern") != NULL) {
             char *substring = strstr(curr.string, "pattern");
             substring += strlen("pattern");
-            printf("\033[0;31m");
-            printf("Line no.%3d: Error : Unknown pattern <%s>\n", curr.lineNo, substring);
-            printf("\033[0;m");
+            printf("Line no.%3d: LEXICAL ERROR : Unknown pattern <%s>\n", curr.lineNo, substring);
             call_token = 1;
         }
         else if (strstr(curr.string, "size") != NULL) {
             char *substring = strstr(curr.string, "size");
             substring += strlen("size");
-            printf("\033[0;31m");
-            printf("Line no.%3d: Error : Variable Identifier is longer than the prescribed length of 20 characters.\n", curr.lineNo);
-            printf("\033[0;m");
+            printf("Line no.%3d: LEXICAL ERROR : Variable Identifier is longer than the prescribed length of 20 characters.\n", curr.lineNo);
             call_token = 1;
         }
         else if (strstr(curr.string, "symbol") != NULL) {
             char *substring = strstr(curr.string, "symbol");
             substring += strlen("symbol");
-            printf("\033[0;31m");
-            printf("Line no.%3d: Error : Unknown symbol <%s>\n", curr.lineNo, substring);
-            printf("\033[0;m");
+            printf("Line no.%3d: LEXICAL ERROR : Unknown symbol <%s>\n", curr.lineNo, substring);
             call_token = 1;
         }
         else{
@@ -1041,7 +1051,7 @@ void parser_main(char * filename){
                 continue;
             }
             if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==0 && predictive_table[sym.nt][curr.name].is_error==0){
-                pop(&stack);
+                pop(&stack, curr);
                 // printf("%s ==> ", parse_nonterminaltoString(sym.nt)); // Print the LHS of the rule
                 // print_list(predictive_table[sym.nt][curr.name].rule_rhs);
                 push_list(predictive_table[sym.nt][curr.name].rule_rhs, &stack, cur_top->treeNode, 0);
@@ -1050,32 +1060,26 @@ void parser_main(char * filename){
                 continue;
             }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_syn==1){
                 // SYN
-                printf("\033[0;31m");
-                printf("Line no.%3d: (SYN) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, tokenToString(curr.name), curr.string, nonterminaltoString(sym.nt));
-                printf("\033[0;m");
-                pop(&stack);
+                printf("Line no.%3d: SYNTAX ERROR (SYN) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, parse_tokenToString(curr.name), curr.string, parse_nonterminaltoString(sym.nt));
+                pop(&stack, curr);
                 push_list(NULL, &stack, cur_top->treeNode, 1);
                 free(cur_top);
                 call_token=0;
                 continue;
             }else if(sym.is_terminal==0 && predictive_table[sym.nt][curr.name].is_error==1){
                 // ERROR
-                printf("\033[0;31m");
-                printf("Line no.%3d: (ERROR) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, tokenToString(curr.name), curr.string, nonterminaltoString(sym.nt));
-                printf("\033[0;m");
+                printf("Line no.%3d: SYNTAX ERROR (ERROR) The token %s for lexeme %s does not match with expected nonterminal %s \n",curr.lineNo, parse_tokenToString(curr.name), curr.string, parse_nonterminaltoString(sym.nt));
                 call_token=1;
                 continue;
             }else if(sym.is_terminal==1){
                 if(sym.t == curr.name){
-                    pop(&stack);
+                    pop(&stack, curr);
                     free(cur_top);
                     call_token=1;
                     continue;
                 }else{
-                    printf("\033[0;31m");
-                    printf("Line no.%3d: (TERMINAL NON MATCH) The token %s for lexeme %s does not match with expected token %s \n",curr.lineNo, tokenToString(curr.name), curr.string, tokenToString(sym.t));
-                    printf("\033[0;m");
-                    pop(&stack);
+                    printf("Line no.%3d: SYNTAX (TERMINAL NON MATCH) The token %s for lexeme %s does not match with expected token %s \n",curr.lineNo, parse_tokenToString(curr.name), curr.string, parse_tokenToString(sym.t));
+                    pop(&stack, curr);
                     free(cur_top);
                     call_token = 0;
                     continue;

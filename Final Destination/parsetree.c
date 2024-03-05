@@ -179,6 +179,8 @@ void print_inorder(Node *node)
         if (node->data.is_terminal)
         {
             printf("Terminal: %s\n", tokenToString(node->data.t));
+            // if node->data.t == TK_EPS (no line or lexeme)
+            printf("Line No : %d\n", node->token.lineNo);
         }
         else
         {
@@ -191,3 +193,8 @@ void print_inorder(Node *node)
     }
 }
 
+void add_lexeme_to_node(Node *node, TOKEN cur_token){
+    if(node != NULL){
+        node->token = cur_token;
+    }
+}
